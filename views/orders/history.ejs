@@ -1,0 +1,51 @@
+<<%- include('../partials/header') %> <h1><%= singleOrder ? 'Order Details' : 'My Orders' %></h1>
+
+  <% if (orders.length === 0) { %>
+  <div class="empty-state">
+    <p>No orders yet.</p>
+    <a href="/products" class="btn btn-primary">Start Shopping</a>
+  </div>
+  <% } else { %>
+  <div class="orders-list">
+    <% orders.forEach(order => { %>
+    <div class="order-card">
+      <div class="order-header">
+        <div>
+          <h3>Order #<%= order.id %></h3>
+          <p class="order-date"><%= new Date(order.created_at).toLocaleDateString() %></p>
+        </div>
+        <span class="order-status status-<%= order.status %>"><%= order.status %></span>
+      </div>
+
+      <div class="order-meta">
+        <p><strong>Total:</strong> $<%= order.total_price %></p>
+        <p><strong>Items:</strong> <%= order.item_count %></p>
+        <% if (order.shipping_address) { %>
+        <p><strong>Ship to:</strong> <%= order.shipping_address %></p>
+        <% } %>
+      </div>
+
+      <% if (order.items && order.items.length > 0) { %>
+      <div class="order-items">
+        <h4>Items</h4>
+        <% order.items.forEach(item => { %>
+        <div class="order-item-row">
+          <img src="<%= item.image_url || '/images/placeholder.jpg' %>" alt="<%= item.product_name %>" class="order-item-thumb">
+          <div>
+            <p><%= item.product_name %></p>
+            <p class="text-muted">Qty: <%= item.quantity %> @ $<%= item.price %></p>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <% if (!singleOrder) { %>
+      <a href="/orders/<%= order.id %>" class="btn btn-secondary btn-small">View Details</a>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <<%- include('../partials/footer') %>

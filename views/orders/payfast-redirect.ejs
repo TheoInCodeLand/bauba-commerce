@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f9fafb;
+    }
+
+    .loader {
+      text-align: center;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1rem;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    p {
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>Redirecting to secure payment gateway...</p>
+  </div>
+
+  <form id="payfastForm" action="<%= payfastUrl %>" method="POST" style="display:none;">
+    <% Object.keys(payfastData).forEach(key => { %>
+    <input type="hidden" name="<%= key %>" value="<%- payfastData[key] %>">
+    <% }) %>
+  </form>
+
+  <script>
+    // Auto-submit form immediately on load
+    document.getElementById('payfastForm').submit();
+  </script>
+</body>
+
+</html>

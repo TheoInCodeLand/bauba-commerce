@@ -1,0 +1,52 @@
+<<%- include('../partials/header') %> <h1>Shopping Cart</h1>
+
+  <% if (cart.items.length === 0) { %>
+  <div class="empty-state">
+    <p>Your cart is empty.</p>
+    <a href="/products" class="btn btn-primary">Start Shopping</a>
+  </div>
+  <% } else { %>
+  <div class="cart-container">
+    <div class="cart-items">
+      <% cart.items.forEach(item => { %>
+      <div class="cart-item">
+        <img src="<%= item.imageUrl || '/images/placeholder.jpg' %>" alt="<%= item.name %>" class="cart-item-image">
+
+        <div class="cart-item-details">
+          <h3><a href="/products/<%= item.productId %>"><%= item.name %></a></h3>
+          <p class="item-price">$<%= item.price %> each</p>
+        </div>
+
+        <form action="/cart/update" method="POST" class="cart-item-quantity">
+          <input type="hidden" name="productId" value="<%= item.productId %>">
+          <input type="number" name="quantity" value="<%= item.quantity %>" min="1" max="<%= item.stock %>">
+          <button type="submit" class="btn btn-secondary btn-small">Update</button>
+        </form>
+
+        <div class="cart-item-total">
+          $<%= item.itemTotal %>
+        </div>
+
+        <form action="/cart/remove" method="POST" class="cart-item-remove">
+          <input type="hidden" name="productId" value="<%= item.productId %>">
+          <button type="submit" class="btn btn-danger btn-small">×</button>
+        </form>
+      </div>
+      <% }) %>
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-row total">
+        <span>Total</span>
+        <span>$<%= cart.total %></span>
+      </div>
+
+      <div class="cart-actions">
+        <a href="/products" class="btn btn-secondary">Continue Shopping</a>
+        <a href="/orders/checkout" class="btn btn-primary btn-full">Proceed to Checkout</a>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <<%- include('../partials/footer') %>

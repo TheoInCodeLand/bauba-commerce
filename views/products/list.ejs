@@ -1,0 +1,44 @@
+<<%- include('../partials/header') %> <div class="page-header">
+  <h1><%= title %></h1>
+
+  <% if (categories.length > 0) { %>
+  <div class="category-filter">
+    <a href="/products" class="<%= !selectedCategory ? 'active' : '' %>">All</a>
+    <% categories.forEach(cat => { %>
+    <a href="/products?category=<%= cat.id %>" class="<%= selectedCategory == cat.id ? 'active' : '' %>">
+      <%= cat.name %>
+    </a>
+    <% }) %>
+  </div>
+  <% } %>
+  </div>
+
+  <% if (products.length === 0) { %>
+  <div class="empty-state">
+    <p>No products available.</p>
+  </div>
+  <% } else { %>
+  <div class="product-grid">
+    <% products.forEach(product => { %>
+    <article class="product-card">
+      <a href="/products/<%= product.id %>" class="product-link">
+        <div class="product-image">
+          <img src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="<%= product.name %>" loading="lazy">
+        </div>
+        <div class="product-info">
+          <h3><%= product.name %></h3>
+          <p class="product-category"><%= product.category_name || 'Uncategorized' %></p>
+          <p class="product-price">$<%= product.price %></p>
+        </div>
+      </a>
+      <form action="/cart/add" method="POST" class="add-to-cart-form">
+        <input type="hidden" name="productId" value="<%= product.id %>">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="btn btn-primary btn-small">Add to Cart</button>
+      </form>
+    </article>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <<%- include('../partials/footer') %>

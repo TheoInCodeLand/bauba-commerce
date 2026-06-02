@@ -1,0 +1,32 @@
+<<%- include('../partials/header') %> <<article class="product-detail">
+  <div class="product-detail-image">
+    <img src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="<%= product.name %>">
+  </div>
+
+  <div class="product-detail-info">
+    <h1><%= product.name %></h1>
+    <p class="product-category"><%= product.category_name || 'Uncategorized' %></p>
+    <p class="product-price price-large">$<%= product.price %></p>
+
+    <div class="product-description">
+      <p><%= product.description || 'No description available.' %></p>
+    </div>
+
+    <p class="stock-info">In Stock: <%= product.stock_quantity %></p>
+
+    <form action="/cart/add" method="POST" class="add-to-cart-form detail-form">
+      <input type="hidden" name="productId" value="<%= product.id %>">
+
+      <div class="quantity-selector">
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" value="1" min="1" max="<%= product.stock_quantity %>">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-large">Add to Cart</button>
+    </form>
+
+    <a href="/products" class="back-link">← Back to Products</a>
+  </div>
+  </article>
+
+  <<%- include('../partials/footer') %>

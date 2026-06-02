@@ -1,0 +1,122 @@
+<%- include('../partials/header') %>
+
+<div class="payment-status-page">
+  <div class="status-icon" id="statusIcon">⏳</div>
+  <h1 id="statusTitle">Confirming Your Payment</h1>
+  <p id="statusText">We're waiting for PayFast to confirm your payment. This usually takes a few seconds.</p>
+
+  <div class="status-meta">
+    <span class="timer" id="timer">Checking...</span>
+  </div>
+
+  <div class="status-actions" id="actions" style="display:none;">
+    <a href="/orders" class="btn btn-primary">View My Orders</a>
+    <a href="/products" class="btn btn-secondary">Continue Shopping</a>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // Configuration
+    const CHECK_INTERVALS = [2000, 3000, 5000, 5000, 10000, 10000]; // Progressive backoff
+    const MAX_WAIT_MS = 90000; // 1.5 minutes absolute max
+    const startTime = Date.now();
+
+    let checkIndex = 0;
+    let checkCount = 0;
+    let timerEl = document.getElementById('timer');
+    let statusIcon = document.getElementById('statusIcon');
+    let statusTitle = document.getElementById('statusTitle');
+    let statusText = document.getElementById('statusText');
+    let actions = document.getElementById('actions');
+
+    // Immediate first check — don't wait
+    checkStatus();
+
+    function scheduleNext() {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > MAX_WAIT_MS) {
+        showTimeout();
+        return;
+      }
+
+      const delay = CHECK_INTERVALS[Math.min(checkIndex, CHECK_INTERVALS.length - 1)];
+      checkIndex++;
+
+      // Update countdown text
+      let seconds = Math.ceil(delay / 1000);
+      timerEl.textContent = `Checking again in ${seconds}s...`;
+
+      const countdown = setInterval(() => {
+        seconds--;
+        if (seconds > 0) timerEl.textContent = `Checking again in ${seconds}s...`;
+      }, 1000);
+
+      setTimeout(() => {
+        clearInterval(countdown);
+        checkStatus();
+      }, delay);
+    }
+
+    async function checkStatus() {
+      checkCount++;
+      timerEl.textContent = 'Checking now...';
+
+      try {
+        const res = await fetch('/orders/api/latest-status', {
+          credentials: 'same-origin',
+          cache: 'no-store'
+        });
+
+        if (!res.ok) throw new Error('Network error');
+
+        const data = await res.json();
+
+        if (data.status === 'paid') {
+          // ✅ CONFIRMED — redirect immediately
+          statusIcon.textContent = '✅';
+          statusTitle.textContent = 'Payment Confirmed!';
+          statusText.textContent = 'Redirecting to your order...';
+          timerEl.textContent = '';
+
+          setTimeout(() => {
+            window.location.href = '/orders/' + data.orderId;
+          }, 800);
+          return;
+        }
+
+        if (data.status === 'failed' || data.status === 'expired' || data.status === 'cancelled') {
+          showFailure();
+          return;
+        }
+
+        // Still pending — schedule next check
+        scheduleNext();
+
+      } catch (err) {
+        console.error('Status check failed:', err);
+        // Retry on error
+        scheduleNext();
+      }
+    }
+
+    function showTimeout() {
+      statusIcon.textContent = '⏱️';
+      statusTitle.textContent = 'Taking Longer Than Expected';
+      statusText.textContent = "Your payment is still being processed. Don't worry — if it succeeds, you'll see it in your orders. You can safely leave this page.";
+      timerEl.textContent = '';
+      actions.style.display = 'flex';
+    }
+
+    function showFailure() {
+      statusIcon.textContent = '❌';
+      statusTitle.textContent = 'Payment Failed';
+      statusText.textContent = 'We could not confirm your payment. Your cart items are still available.';
+      timerEl.textContent = '';
+      actions.style.display = 'flex';
+      actions.innerHTML = '<a href="/cart" class="btn btn-primary">Return to Cart</a><a href="/products" class="btn btn-secondary">Continue Shopping</a>';
+    }
+  })();
+</script>
+
+<%- include('../partials/footer') %>

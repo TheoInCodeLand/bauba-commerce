@@ -1,0 +1,40 @@
+<<%- include('../partials/header') %> <h1>Checkout</h1>
+
+  <% if (error) { %>
+  <div class="alert alert-error"><%= error %></div>
+  <% } %>
+
+  <div class="checkout-layout">
+    <div class="checkout-form">
+      <h2>Shipping Information</h2>
+
+      <form action="/orders/checkout" method="POST">
+        <div class="form-group">
+          <label for="shippingAddress">Shipping Address</label>
+          <textarea id="shippingAddress" name="shippingAddress" rows="4" required placeholder="Enter your full shipping address..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-large btn-full">Place Order</button>
+      </form>
+    </div>
+
+    <div class="checkout-summary">
+      <h2>Order Summary</h2>
+
+      <div class="checkout-items">
+        <% cart.items.forEach(item => { %>
+        <div class="checkout-item">
+          <span><%= item.name %> × <%= item.quantity %></span>
+          <span>$<%= item.itemTotal %></span>
+        </div>
+        <% }) %>
+      </div>
+
+      <div class="checkout-total">
+        <strong>Total</strong>
+        <strong>$<%= cart.total %></strong>
+      </div>
+    </div>
+  </div>
+
+  <<%- include('../partials/footer') %>

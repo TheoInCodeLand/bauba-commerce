@@ -1,0 +1,50 @@
+<<%- include('../partials/header') %> <h1>Admin Dashboard</h1>
+
+  <div class="admin-stats">
+    <div class="stat-card">
+      <h3><%= productCount %></h3>
+      <p>Products</p>
+    </div>
+    <div class="stat-card">
+      <h3><%= orderCount %></h3>
+      <p>Orders</p>
+    </div>
+  </div>
+
+  <div class="admin-sections">
+    <div class="admin-section">
+      <div class="section-header">
+        <h2>Recent Orders</h2>
+        <a href="/admin" class="btn btn-secondary btn-small">Refresh</a>
+      </div>
+
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% orders.slice(0, 10).forEach(order => { %>
+          <tr>
+            <td>#<%= order.id %></td>
+            <td><%= order.user_email %></td>
+            <td>$<%= order.total_price %></td>
+            <td><span class="status-badge status-<%= order.status %>"><%= order.status %></span></td>
+            <td><%= new Date(order.created_at).toLocaleDateString() %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="admin-actions">
+      <a href="/admin/products" class="btn btn-primary">Manage Products</a>
+    </div>
+  </div>
+
+  <<%- include('../partials/footer') %>
