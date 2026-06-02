@@ -1,7 +1,3 @@
-// app.js
-// Main application entry point
-// Sets up Express, sessions, EJS, static files, and route mounting
-
 require('dotenv').config();
 
 const express = require('express');
@@ -22,10 +18,6 @@ const { startCleanupJob } = require('./services/cleanupService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// ============================================
-// Middleware
-// ============================================
 
 // Parse JSON and form data
 app.use(express.json());
@@ -81,10 +73,6 @@ app.get('/', (req, res) => {
     res.redirect('/products');
 });
 
-// ============================================
-// Error Handling
-// ============================================
-
 // 404 handler
 app.use((req, res) => {
     res.status(404).render('partials/error', {
@@ -103,10 +91,6 @@ app.use((err, req, res, next) => {
             : err.message
     });
 });
-
-// ============================================
-// Start Server
-// ============================================
 
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
