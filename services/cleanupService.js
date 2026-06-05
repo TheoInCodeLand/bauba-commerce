@@ -11,7 +11,7 @@ function startCleanupJob() {
     // Then every 60 seconds
     setInterval(runCleanup, 60000);
 
-    console.log('🧹Background cleanup job started (every 60s)');
+    console.log('--cleaned--Background cleanup job started (every 60s)');
 }
 
 async function runCleanup() {

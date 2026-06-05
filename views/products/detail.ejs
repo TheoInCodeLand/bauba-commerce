@@ -220,6 +220,12 @@
 </section>
 <% } %>
 
+<%/* ========== ML RECOMMENDATIONS ========== */%>
+<section id="ml-recommendations-section" class="related-products" style="display: none;">
+  <h2 class="section-title">Customers who bought this also bought</h2>
+  <div id="ml-recommendations-grid" class="related-grid product-scroll"></div>
+</section>
+
 <%/* ========== REVIEWS SECTION ========== */%>
 <section class="reviews-section" id="reviews-section">
   <h2 class="section-title">Customer Reviews</h2>
@@ -324,5 +330,52 @@
   </div>
   <% } %>
 </section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const productId = '<%= product.id %>';
+    if (!productId) return;
+    
+    try {
+      const response = await fetch(`/api/personalization/recommendations/${productId}`);
+      const data = await response.json();
+      
+      if (data.products && data.products.length > 0) {
+        const section = document.getElementById('ml-recommendations-section');
+        const grid = document.getElementById('ml-recommendations-grid');
+        
+        let html = '';
+        data.products.forEach(rp => {
+          html += `
+            <article class="product-card related-card">
+              <a href="/products/${rp.slug || rp.id}" class="product-link">
+                <div class="product-image">
+                  <img src="${rp.image_url || '/images/placeholder.jpg'}" alt="${rp.name}" loading="lazy">
+                </div>
+                <div class="product-info">
+                  <h3>${rp.name}</h3>
+                  <p class="product-category">${rp.category_name || ''}</p>
+                  ${rp.discount_price ? `
+                  <p class="product-price">
+                    <span class="price-old">ZAR ${rp.price}</span>
+                    <strong>ZAR ${rp.discount_price}</strong>
+                  </p>
+                  ` : `
+                  <p class="product-price">ZAR ${rp.price}</p>
+                  `}
+                </div>
+              </a>
+            </article>
+          `;
+        });
+        
+        grid.innerHTML = html;
+        section.style.display = 'block';
+      }
+    } catch (err) {
+      console.error('Failed to fetch ML recommendations:', err);
+    }
+  });
+</script>
 
 <%- include('../partials/footer') %>

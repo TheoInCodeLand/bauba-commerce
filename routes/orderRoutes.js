@@ -5,6 +5,7 @@ const cartService = require('../services/cartService');
 const orderService = require('../services/orderService');
 const paymentService = require('../services/paymentService');
 const stockService = require('../services/stockService');
+const { orderQueue } = require('../services/orderWorker');
 
 const router = express.Router();
 
@@ -69,6 +70,25 @@ router.post('/checkout', requireAuth, async (req, res) => {
         // Clear cart — order is now the source of truth
         req.session.cart = cartService.clearCart();
         console.log('[Checkout] Step 3 — Cart cleared');
+
+        // ── Enqueue background job (non-blocking) ────────────────────────────
+        // The worker will send the confirmation email (and act as a stock-commit
+        // safety net) without making the user wait.
+        try {
+            // Fetch the full order (with items) so the email template has
+            // product names and per-line prices available.
+            const orderDetails = await orderService.getOrderById(order.id);
+            await orderQueue.add('process-checkout', {
+                orderId:   order.id,
+                userEmail: req.session.user.email,
+                order:     orderDetails || order,
+            });
+            console.log(`[Checkout] Step 3b — Enqueued background job for order #${order.id}`);
+        } catch (queueErr) {
+            // Queue failure must NEVER block the checkout response.
+            // The user's order is created; we just log the enqueue error.
+            console.error('[Checkout] ⚠️  Failed to enqueue background job:', queueErr.message);
+        }
 
         // Mark as payment_pending and build PayFast form
         await orderService.markPaymentPending(order.id, {});

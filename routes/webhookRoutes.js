@@ -74,7 +74,7 @@ router.post('/payfast', express.urlencoded({ extended: true }), async (req, res)
             }
 
         } else if (status === 'FAILED' || status === 'CANCELLED') {
-            // ❌ Payment failed — release stock
+            // --failed-- Payment failed — release stock
             await orderService.failOrder(order.id, `PayFast status: ${status}`);
             console.log('Order failed:', order.id);
 

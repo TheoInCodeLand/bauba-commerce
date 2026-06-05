@@ -5,19 +5,19 @@ const redisClient = createClient({
 });
 
 redisClient.on('connect', () => {
-    console.log('✅ Redis connected');
+    console.log('--success-- Redis connected');
 });
 
 redisClient.on('ready', () => {
-    console.log('✅ Redis ready');
+    console.log('--success-- Redis ready');
 });
 
 redisClient.on('error', (err) => {
-    console.error('❌ Redis error:', err.message);
+    console.error('--failed-- Redis error:', err.message);
 });
 
 redisClient.on('reconnecting', () => {
-    console.log('🔄 Redis reconnecting...');
+    console.log('--retry-- Redis reconnecting...');
 });
 
 module.exports = redisClient;

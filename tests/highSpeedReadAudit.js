@@ -14,25 +14,25 @@
 
 'use strict';
 const assert = require('assert');
-const path   = require('path');
-const fs     = require('fs');
+const path = require('path');
+const fs = require('fs');
 
 // ─── Telemetry ──────────────────────────────────────────────────────────────
-let totalTests  = 0;
+let totalTests = 0;
 let passedTests = 0;
 let failedTests = 0;
-const failures  = [];
+const failures = [];
 
 function test(name, fn) {
     totalTests++;
     try {
         fn();
         passedTests++;
-        console.log(`  ✅  ${name}`);
+        console.log(`  --success--  ${name}`);
     } catch (err) {
         failedTests++;
         failures.push({ name, error: err.message });
-        console.log(`  ❌  ${name}`);
+        console.log(`  --failed--  ${name}`);
         console.log(`      ↳ ${err.message}`);
     }
 }
@@ -42,11 +42,11 @@ async function testAsync(name, fn) {
     try {
         await fn();
         passedTests++;
-        console.log(`  ✅  ${name}`);
+        console.log(`  --success--  ${name}`);
     } catch (err) {
         failedTests++;
         failures.push({ name, error: err.message });
-        console.log(`  ❌  ${name}`);
+        console.log(`  --failed--  ${name}`);
         console.log(`      ↳ ${err.message}`);
     }
 }
@@ -61,7 +61,7 @@ function section(title) {
 // In-memory key-value store that simulates the redis@6 client API.
 function createMockRedis({ shouldFail = false } = {}) {
     const store = new Map();
-    const ttls  = new Map();
+    const ttls = new Map();
     let connected = false;
 
     return {
@@ -106,12 +106,12 @@ function createMockRedis({ shouldFail = false } = {}) {
 }
 
 // ─── Mock PostgreSQL Services ───────────────────────────────────────────────
-const MOCK_BRANDS      = [{ id: 1, name: 'Nike' }, { id: 2, name: 'Adidas' }];
-const MOCK_DISCOUNTED  = [{ id: 10, name: 'Widget', discount_price: 9.99, price: 19.99 }];
+const MOCK_BRANDS = [{ id: 1, name: 'Nike' }, { id: 2, name: 'Adidas' }];
+const MOCK_DISCOUNTED = [{ id: 10, name: 'Widget', discount_price: 9.99, price: 19.99 }];
 const MOCK_DEPARTMENTS = [{ id: 1, name: 'Electronics' }, { id: 2, name: 'Fashion' }];
-const MOCK_TRENDING    = [{ id: 20, name: 'Gizmo', price: 14.99 }];
-const MOCK_NEW         = [{ id: 30, name: 'New Widget', price: 29.99 }];
-const MOCK_RECENTLY    = [{ id: 42, name: 'Headphones', slug: 'headphones', price: 59.99, image_url: null, brand_name: 'Sony' }];
+const MOCK_TRENDING = [{ id: 20, name: 'Gizmo', price: 14.99 }];
+const MOCK_NEW = [{ id: 30, name: 'New Widget', price: 29.99 }];
+const MOCK_RECENTLY = [{ id: 42, name: 'Headphones', slug: 'headphones', price: 59.99, image_url: null, brand_name: 'Sony' }];
 
 function createMockServices({ shouldFail = false } = {}) {
     const throwDB = () => { throw new Error('MOCK_DB: connection timeout'); };
@@ -122,8 +122,8 @@ function createMockServices({ shouldFail = false } = {}) {
         },
         productService: {
             getDiscountedProducts: shouldFail ? throwDB : async () => MOCK_DISCOUNTED,
-            getTrendingProducts:   shouldFail ? throwDB : async () => MOCK_TRENDING,
-            getNewArrivals:        shouldFail ? throwDB : async () => MOCK_NEW,
+            getTrendingProducts: shouldFail ? throwDB : async () => MOCK_TRENDING,
+            getNewArrivals: shouldFail ? throwDB : async () => MOCK_NEW,
             getRecentlyViewedProducts: async (ids) => {
                 if (!ids || ids.length === 0) return [];
                 return MOCK_RECENTLY.filter(p => ids.includes(p.id));
@@ -142,7 +142,7 @@ function mockReqRes({ session = {}, query = {} } = {}) {
         _body: null,
         _rendered: null,
         status(code) { this._status = code; return this; },
-        json(obj)    { this._body = obj; },
+        json(obj) { this._body = obj; },
         render(view, data) { this._rendered = { view, data }; },
     };
     const req = { session, query };
@@ -156,12 +156,12 @@ async function suite_cacheWorker() {
     section('SUITE 1 — Cache Worker: refreshHomepageCache()');
 
     const mockRedis = createMockRedis();
-    const mocks     = createMockServices();
+    const mocks = createMockServices();
     const CACHE_KEYS = {
-        BRANDS:       'home:brands',
-        DISCOUNTED:   'home:discounted',
-        DEPARTMENTS:  'home:departments',
-        TRENDING:     'home:trending',
+        BRANDS: 'home:brands',
+        DISCOUNTED: 'home:discounted',
+        DEPARTMENTS: 'home:departments',
+        TRENDING: 'home:trending',
         NEW_ARRIVALS: 'home:newArrivals',
     };
     const CACHE_TTL_SECONDS = 7 * 60;
@@ -178,14 +178,14 @@ async function suite_cacheWorker() {
             ]);
 
             await Promise.all([
-                mockRedis.set(CACHE_KEYS.BRANDS,       JSON.stringify(brands),       { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.DISCOUNTED,   JSON.stringify(discounted),   { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.DEPARTMENTS,  JSON.stringify(departments),  { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.TRENDING,     JSON.stringify(trending),     { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.NEW_ARRIVALS, JSON.stringify(newArrivals),  { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.BRANDS, JSON.stringify(brands), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.DISCOUNTED, JSON.stringify(discounted), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.DEPARTMENTS, JSON.stringify(departments), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.TRENDING, JSON.stringify(trending), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.NEW_ARRIVALS, JSON.stringify(newArrivals), { EX: CACHE_TTL_SECONDS }),
             ]);
         } catch (err) {
-            console.error('❌ [CacheWorker] Failed to refresh homepage cache:', err.message);
+            console.error('--failed-- [CacheWorker] Failed to refresh homepage cache:', err.message);
         }
     }
 
@@ -292,8 +292,8 @@ async function suite_personalizationAPI() {
         const res = {
             _status: 200, _body: null,
             status(c) { this._status = c; return this; },
-            json(o)   { this._body = o; },
-            render()  {},
+            json(o) { this._body = o; },
+            render() { },
         };
         const req = { session: undefined };
         await handler(req, res);
@@ -316,30 +316,30 @@ async function suite_personalizationAPI() {
 async function suite_redisCrash() {
     section('SUITE 3 — Chaos: Redis Crash Simulation');
 
-    const failRedis  = createMockRedis({ shouldFail: true });
+    const failRedis = createMockRedis({ shouldFail: true });
     const CACHE_KEYS = {
-        BRANDS:       'home:brands',
-        DISCOUNTED:   'home:discounted',
-        DEPARTMENTS:  'home:departments',
-        TRENDING:     'home:trending',
+        BRANDS: 'home:brands',
+        DISCOUNTED: 'home:discounted',
+        DEPARTMENTS: 'home:departments',
+        TRENDING: 'home:trending',
         NEW_ARRIVALS: 'home:newArrivals',
     };
 
     // Simulate the GET / route handler with a dead Redis
     async function homeHandler(req, res) {
         try {
-            const brandsJson      = await failRedis.get(CACHE_KEYS.BRANDS);
-            const discountedJson  = await failRedis.get(CACHE_KEYS.DISCOUNTED);
+            const brandsJson = await failRedis.get(CACHE_KEYS.BRANDS);
+            const discountedJson = await failRedis.get(CACHE_KEYS.DISCOUNTED);
             const departmentsJson = await failRedis.get(CACHE_KEYS.DEPARTMENTS);
-            const trendingJson    = await failRedis.get(CACHE_KEYS.TRENDING);
+            const trendingJson = await failRedis.get(CACHE_KEYS.TRENDING);
             const newArrivalsJson = await failRedis.get(CACHE_KEYS.NEW_ARRIVALS);
 
             res.render('home', {
                 title: 'Welcome',
-                brands:      brandsJson      ? JSON.parse(brandsJson)      : [],
-                discounted:  discountedJson  ? JSON.parse(discountedJson)  : [],
+                brands: brandsJson ? JSON.parse(brandsJson) : [],
+                discounted: discountedJson ? JSON.parse(discountedJson) : [],
                 departments: departmentsJson ? JSON.parse(departmentsJson) : [],
-                trending:    trendingJson    ? JSON.parse(trendingJson)    : [],
+                trending: trendingJson ? JSON.parse(trendingJson) : [],
                 newArrivals: newArrivalsJson ? JSON.parse(newArrivalsJson) : [],
             });
         } catch (err) {
@@ -364,18 +364,18 @@ async function suite_redisCrash() {
 
         async function homeHandlerEmpty(req, res) {
             try {
-                const brandsJson      = await emptyRedis.get(CACHE_KEYS.BRANDS);
-                const discountedJson  = await emptyRedis.get(CACHE_KEYS.DISCOUNTED);
+                const brandsJson = await emptyRedis.get(CACHE_KEYS.BRANDS);
+                const discountedJson = await emptyRedis.get(CACHE_KEYS.DISCOUNTED);
                 const departmentsJson = await emptyRedis.get(CACHE_KEYS.DEPARTMENTS);
-                const trendingJson    = await emptyRedis.get(CACHE_KEYS.TRENDING);
+                const trendingJson = await emptyRedis.get(CACHE_KEYS.TRENDING);
                 const newArrivalsJson = await emptyRedis.get(CACHE_KEYS.NEW_ARRIVALS);
 
                 res.render('home', {
                     title: 'Welcome',
-                    brands:      brandsJson      ? JSON.parse(brandsJson)      : [],
-                    discounted:  discountedJson  ? JSON.parse(discountedJson)  : [],
+                    brands: brandsJson ? JSON.parse(brandsJson) : [],
+                    discounted: discountedJson ? JSON.parse(discountedJson) : [],
                     departments: departmentsJson ? JSON.parse(departmentsJson) : [],
-                    trending:    trendingJson    ? JSON.parse(trendingJson)    : [],
+                    trending: trendingJson ? JSON.parse(trendingJson) : [],
                     newArrivals: newArrivalsJson ? JSON.parse(newArrivalsJson) : [],
                 });
             } catch (err) {
@@ -402,13 +402,13 @@ async function suite_redisCrash() {
 async function suite_dbTimeout() {
     section('SUITE 4 — Chaos: Database Timeout During Cache Refresh');
 
-    const mockRedis   = createMockRedis();
-    const failMocks   = createMockServices({ shouldFail: true });
+    const mockRedis = createMockRedis();
+    const failMocks = createMockServices({ shouldFail: true });
     const CACHE_KEYS = {
-        BRANDS:       'home:brands',
-        DISCOUNTED:   'home:discounted',
-        DEPARTMENTS:  'home:departments',
-        TRENDING:     'home:trending',
+        BRANDS: 'home:brands',
+        DISCOUNTED: 'home:discounted',
+        DEPARTMENTS: 'home:departments',
+        TRENDING: 'home:trending',
         NEW_ARRIVALS: 'home:newArrivals',
     };
     const CACHE_TTL_SECONDS = 7 * 60;
@@ -429,15 +429,15 @@ async function suite_dbTimeout() {
             ]);
 
             await Promise.all([
-                mockRedis.set(CACHE_KEYS.BRANDS,       JSON.stringify(brands),       { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.DISCOUNTED,   JSON.stringify(discounted),   { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.DEPARTMENTS,  JSON.stringify(departments),  { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.TRENDING,     JSON.stringify(trending),     { EX: CACHE_TTL_SECONDS }),
-                mockRedis.set(CACHE_KEYS.NEW_ARRIVALS, JSON.stringify(newArrivals),  { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.BRANDS, JSON.stringify(brands), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.DISCOUNTED, JSON.stringify(discounted), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.DEPARTMENTS, JSON.stringify(departments), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.TRENDING, JSON.stringify(trending), { EX: CACHE_TTL_SECONDS }),
+                mockRedis.set(CACHE_KEYS.NEW_ARRIVALS, JSON.stringify(newArrivals), { EX: CACHE_TTL_SECONDS }),
             ]);
         } catch (err) {
             // This is the critical test — the catch must swallow the error
-            console.error('      [Expected log] ❌ [CacheWorker] Failed to refresh:', err.message);
+            console.error('      [Expected log] --failed-- [CacheWorker] Failed to refresh:', err.message);
         }
     }
 
@@ -495,8 +495,8 @@ async function suite_sourceInspection() {
         assert.ok(src.includes('catch'), 'Should have catch block');
         // Check that it won't blow up on undefined session
         const usesOptionalOrFallback = src.includes('req.session.recentlyViewed || []')
-                                     || src.includes('req.session?.recentlyViewed')
-                                     || src.includes('(req.session && req.session.recentlyViewed)');
+            || src.includes('req.session?.recentlyViewed')
+            || src.includes('(req.session && req.session.recentlyViewed)');
         assert.ok(usesOptionalOrFallback, 'Should use || [] or ?. fallback for session access');
     });
 
@@ -511,9 +511,9 @@ async function suite_sourceInspection() {
         assert.ok(scriptBody.includes('try'), 'Client-side script should have try block');
         assert.ok(scriptBody.includes('catch'), 'Client-side script should have catch block');
         assert.ok(scriptBody.includes("fetch('/api/personalization/recently-viewed')") ||
-                  scriptBody.includes('fetch(\'/api/personalization/recently-viewed\')') ||
-                  scriptBody.includes('fetch(`/api/personalization/recently-viewed`)'),
-                  'Should fetch the personalization endpoint');
+            scriptBody.includes('fetch(\'/api/personalization/recently-viewed\')') ||
+            scriptBody.includes('fetch(`/api/personalization/recently-viewed`)'),
+            'Should fetch the personalization endpoint');
     });
 
     // 5.6  home.ejs: fetch error does NOT block IntersectionObserver
@@ -527,8 +527,8 @@ async function suite_sourceInspection() {
         assert.ok(hasIO, 'Should set up IntersectionObserver');
 
         // IO must be initialized OUTSIDE the DOMContentLoaded try/catch
-        const ioPos   = scriptBody.indexOf('IntersectionObserver');
-        const dclPos  = scriptBody.indexOf('DOMContentLoaded');
+        const ioPos = scriptBody.indexOf('IntersectionObserver');
+        const dclPos = scriptBody.indexOf('DOMContentLoaded');
         assert.ok(ioPos < dclPos,
             'IntersectionObserver should be initialized before DOMContentLoaded handler ' +
             '(in a separate IIFE) so a fetch failure cannot halt it');
@@ -572,10 +572,10 @@ async function suite_apiSessionEdge() {
     //                    (req.session && req.session.recentlyViewed) || []
 
     const safePattern = /req\.session\?\.recentlyViewed/
-                     || src.includes('req.session && req.session.recentlyViewed');
+        || src.includes('req.session && req.session.recentlyViewed');
 
     const hasOptionalChain = src.includes('req.session?.recentlyViewed')
-                          || src.includes('req.session && req.session.recentlyViewed');
+        || src.includes('req.session && req.session.recentlyViewed');
 
     test('apiRoutes.js uses safe access pattern for req.session', () => {
         // If this fails, we will fix it in the repair step
@@ -605,8 +605,8 @@ async function main() {
     console.log('  SUMMARY');
     console.log('═'.repeat(70));
     console.log(`  Total:  ${totalTests}`);
-    console.log(`  Passed: ${passedTests} ✅`);
-    console.log(`  Failed: ${failedTests} ❌`);
+    console.log(`  Passed: ${passedTests} --success--`);
+    console.log(`  Failed: ${failedTests} --failed--`);
 
     if (failures.length > 0) {
         console.log('\n  FAILURES:');

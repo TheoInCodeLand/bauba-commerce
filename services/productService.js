@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { meiliClient } = require('../config/meilisearch');
 const { slugify } = require('../utils/slugify');
 
 function normalizeFilters(filters = {}) {
@@ -26,6 +27,92 @@ async function safeQuery(query, params = []) {
 
 async function getAllProducts(filters = {}) {
     filters = normalizeFilters(filters);
+    const page = Math.max(1, parseInt(filters.page, 10) || 1);
+    const pageSize = Math.max(1, Math.min(100, parseInt(filters.pageSize, 10) || 24));
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  HYBRID PATH A:  Search term present → Meilisearch for ranking,
+    //                  then PostgreSQL for real-time stock/price data.
+    // ═══════════════════════════════════════════════════════════════════
+    if (filters.search) {
+        try {
+            return await _searchViaMeilisearch(filters, page, pageSize);
+        } catch (err) {
+            // If Meilisearch is unreachable, fall through to PostgreSQL
+            console.error('⚠️  Meilisearch search failed, falling back to PostgreSQL:', err.message);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  HYBRID PATH B:  No search term (or Meili fallback) → PostgreSQL
+    //                  Original browsing / filtering logic, untouched.
+    // ═══════════════════════════════════════════════════════════════════
+    return _browseViaPostgres(filters, page, pageSize);
+}
+
+/**
+ * Meilisearch-powered search path.
+ * Queries Meili for typo-tolerant ranked IDs, then hydrates from PostgreSQL.
+ */
+async function _searchViaMeilisearch(filters, page, pageSize) {
+    // Build Meilisearch filter array
+    const meiliFilters = ['is_active = true'];
+
+    if (filters.categoryId) {
+        meiliFilters.push(`category_id = ${Number(filters.categoryId)}`);
+    }
+    if (filters.brandId) {
+        meiliFilters.push(`brand_id = ${Number(filters.brandId)}`);
+    }
+    if (filters.minPrice != null) {
+        meiliFilters.push(`price >= ${Number(filters.minPrice)}`);
+    }
+    if (filters.maxPrice != null) {
+        meiliFilters.push(`price <= ${Number(filters.maxPrice)}`);
+    }
+
+    const offset = (page - 1) * pageSize;
+
+    // Ask for pageSize + 1 so we can detect hasMore
+    const searchResult = await meiliClient.index('products').search(filters.search, {
+        filter: meiliFilters,
+        limit: pageSize + 1,
+        offset,
+    });
+
+    const hits = searchResult.hits || [];
+
+    if (hits.length === 0) {
+        return { products: [], page, pageSize, hasMore: false };
+    }
+
+    const hasMore = hits.length > pageSize;
+    const rankedHits = hasMore ? hits.slice(0, pageSize) : hits;
+    const rankedIds = rankedHits.map(h => h.id);
+
+    // Hydrate from PostgreSQL for real-time stock/price data
+    const placeholders = rankedIds.map((_, i) => `$${i + 1}`).join(', ');
+    const result = await db.query(
+        `SELECT p.*, c.name AS category_name, b.name AS brand_name
+         FROM products p
+         LEFT JOIN categories c ON p.category_id = c.id
+         LEFT JOIN brands b ON p.brand_id = b.id
+         WHERE p.id IN (${placeholders})`,
+        rankedIds
+    );
+
+    // Re-sort PostgreSQL rows to match Meilisearch relevance ranking
+    const rowMap = Object.fromEntries((result.rows || []).map(r => [r.id, r]));
+    const products = rankedIds.map(id => rowMap[id]).filter(Boolean);
+
+    return { products, page, pageSize, hasMore };
+}
+
+/**
+ * Original PostgreSQL browsing path — category browsing, tag filtering,
+ * price/rating ranges, sorting.  Completely unchanged from the monolith.
+ */
+async function _browseViaPostgres(filters, page, pageSize) {
     const params = [];
     const clauses = [];
     let joins = '';
@@ -51,6 +138,7 @@ async function getAllProducts(filters = {}) {
     }
 
     if (filters.search) {
+        // Fallback: PostgreSQL full-text search (only reached if Meilisearch is down)
         clauses.push("to_tsvector('english', coalesce(p.name, '') || ' ' || coalesce(p.description, '')) @@ plainto_tsquery('english', $" + (params.push(filters.search) && params.length) + ")");
     }
 
@@ -73,8 +161,6 @@ async function getAllProducts(filters = {}) {
     };
 
     const sort = orderMap[filters.sort] || orderMap.newest;
-    const page = Math.max(1, parseInt(filters.page, 10) || 1);
-    const pageSize = Math.max(1, Math.min(100, parseInt(filters.pageSize, 10) || 24));
     const limitParam = pageSize + 1;
 
     let query = `SELECT p.*, c.name AS category_name, b.name AS brand_name

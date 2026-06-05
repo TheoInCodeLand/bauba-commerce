@@ -19,11 +19,14 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const { startCleanupJob } = require('./services/cleanupService');
 const { startCacheWorker, CACHE_KEYS } = require('./services/cacheWorker');
+const { startOrderWorker } = require('./services/orderWorker');
 const wishlistService = require('./services/wishlistService');
 const productService = require('./services/productService');
 const brandService = require('./services/brandService');
 const departmentService = require('./services/departmentService');
+const { startMLWorker } = require('./services/mlWorker');
 const apiRoutes = require('./routes/apiRoutes');
+// const { syncProductsToSearch } = require('./services/searchSync');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -145,4 +148,8 @@ app.listen(PORT, async () => {
     await redisClient.connect();
     startCleanupJob();
     startCacheWorker();
+    startOrderWorker();
+    startMLWorker();
 });
+
+// syncProductsToSearch();

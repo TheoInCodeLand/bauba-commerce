@@ -73,7 +73,7 @@
         const data = await res.json();
 
         if (data.status === 'paid') {
-          // ✅ CONFIRMED — redirect immediately
+          // --success-- CONFIRMED — redirect immediately
           statusIcon.textContent = '✅';
           statusTitle.textContent = 'Payment Confirmed!';
           statusText.textContent = 'Redirecting to your order...';
