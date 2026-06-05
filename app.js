@@ -6,6 +6,7 @@ const pgSession = require('connect-pg-simple')(session);
 const path = require('path');
 
 const db = require('./config/db');
+const redisClient = require('./config/redis');
 
 // Import route modules
 const authRoutes = require('./routes/authRoutes');
@@ -17,10 +18,12 @@ const webhookRoutes = require('./routes/webhookRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const { startCleanupJob } = require('./services/cleanupService');
+const { startCacheWorker, CACHE_KEYS } = require('./services/cacheWorker');
 const wishlistService = require('./services/wishlistService');
 const productService = require('./services/productService');
 const brandService = require('./services/brandService');
 const departmentService = require('./services/departmentService');
+const apiRoutes = require('./routes/apiRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -87,38 +90,32 @@ app.use('/orders', orderRoutes);
 app.use('/admin', adminRoutes);
 app.use('/webhooks', webhookRoutes);
 app.use('/wishlist', wishlistRoutes);
+app.use('/api', apiRoutes);
 
 // Home page — rich landing page
+// Global datasets (brands, products, departments) are served from the Redis
+// cache populated by cacheWorker.js.  Only session-specific data (recently
+// viewed products, recent category) still hits PostgreSQL here.
 app.get('/', async (req, res) => {
     try {
-        const recentIds = req.session.recentlyViewed || [];
-        const recentCategory = req.session.recentCategory || null;
-
-        const [brands, discounted, departments, trending, newArrivals, recentlyViewed] = await Promise.all([
-            brandService.getAllBrands(),
-            productService.getDiscountedProducts(16),
-            departmentService.getAllDepartments(),
-            productService.getTrendingProducts(8),
-            productService.getNewArrivals(8),
-            productService.getRecentlyViewedProducts(recentIds),
-        ]);
+        const brandsJson = await redisClient.get(CACHE_KEYS.BRANDS);
+        const discountedJson = await redisClient.get(CACHE_KEYS.DISCOUNTED);
+        const departmentsJson = await redisClient.get(CACHE_KEYS.DEPARTMENTS);
+        const trendingJson = await redisClient.get(CACHE_KEYS.TRENDING);
+        const newArrivalsJson = await redisClient.get(CACHE_KEYS.NEW_ARRIVALS);
 
         res.render('home', {
             title: 'Welcome',
-            brands,
-            discounted,
-            departments,
-            trending,
-            newArrivals,
-            recentlyViewed,
-            recentCategory,
+            brands: brandsJson ? JSON.parse(brandsJson) : [],
+            discounted: discountedJson ? JSON.parse(discountedJson) : [],
+            departments: departmentsJson ? JSON.parse(departmentsJson) : [],
+            trending: trendingJson ? JSON.parse(trendingJson) : [],
+            newArrivals: newArrivalsJson ? JSON.parse(newArrivalsJson) : []
+            // recentlyViewed and recentCategory are completely removed from here
         });
     } catch (err) {
         console.error('Home page error:', err);
-        res.status(500).render('partials/error', {
-            title: 'Error',
-            message: 'Unable to load the home page',
-        });
+        res.status(500).render('error', { title: 'Error', message: 'Unable to load the home page' });
     }
 });
 
@@ -141,8 +138,11 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`bauba running on http://localhost:${PORT}`);
-});
 
-startCleanupJob();
+    // Connect to Redis then boot background workers
+    await redisClient.connect();
+    startCleanupJob();
+    startCacheWorker();
+});
