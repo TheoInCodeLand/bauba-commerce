@@ -6,7 +6,9 @@
     "scripts": {
         "start": "node app.js",
         "dev": "nodemon app.js",
-        "db:init": "psql $DATABASE_URL -f db/schema.sql"
+        "db:init": "psql $DATABASE_URL -f db/schema.sql",
+        "db:migrate": "psql $DATABASE_URL -f db/migrations/001_product_system.sql",
+        "db:migrate2": "psql $DATABASE_URL -f db/migrations/002_features.sql"
     },
     "keywords": [
         "ecommerce",

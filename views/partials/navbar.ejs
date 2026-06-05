@@ -1,4 +1,4 @@
-<<nav class="navbar">
+<nav class="navbar">
   <div class="container nav-container">
     <a href="/products" class="logo">ShopMVP</a>
 
@@ -6,11 +6,17 @@
       <a href="/products">Products</a>
 
       <% if (user) { %>
+      <a href="/wishlist" class="wishlist-link" title="My Wishlist">
+        ♥
+        <% if (wishlistCount > 0) { %>
+        <span class="badge wishlist-badge" id="wishlist-count"><%= wishlistCount %></span>
+        <% } %>
+      </a>
       <a href="/orders">My Orders</a>
       <a href="/cart" class="cart-link">
         Cart
         <% if (cartCount > 0) { %>
-        <span class="badge"><%= cartCount %></span>
+        <span class="badge" id="cart-count-badge"><%= cartCount %></span>
         <% } %>
       </a>
 
@@ -27,10 +33,10 @@
       <a href="/cart" class="cart-link">
         Cart
         <% if (cartCount > 0) { %>
-        <span class="badge"><%= cartCount %></span>
+        <span class="badge" id="cart-count-badge"><%= cartCount %></span>
         <% } %>
       </a>
       <% } %>
     </div>
   </div>
-  </nav>
+</nav>

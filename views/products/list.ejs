@@ -1,4 +1,5 @@
-<<%- include('../partials/header') %> <div class="page-header">
+<%- include('../partials/header') %>
+<div class="page-header">
   <h1><%= title %></h1>
 
   <% if (categories.length > 0) { %>
@@ -11,34 +12,106 @@
     <% }) %>
   </div>
   <% } %>
-  </div>
+</div>
 
-  <% if (products.length === 0) { %>
-  <div class="empty-state">
-    <p>No products available.</p>
-  </div>
-  <% } else { %>
-  <div class="product-grid">
-    <% products.forEach(product => { %>
-    <article class="product-card">
-      <a href="/products/<%= product.id %>" class="product-link">
-        <div class="product-image">
-          <img src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="<%= product.name %>" loading="lazy">
-        </div>
-        <div class="product-info">
-          <h3><%= product.name %></h3>
-          <p class="product-category"><%= product.category_name || 'Uncategorized' %></p>
-          <p class="product-price">$<%= product.price %></p>
-        </div>
-      </a>
-      <form action="/cart/add" method="POST" class="add-to-cart-form">
-        <input type="hidden" name="productId" value="<%= product.id %>">
-        <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="btn btn-primary btn-small">Add to Cart</button>
-      </form>
-    </article>
-    <% }) %>
-  </div>
-  <% } %>
+<section class="product-controls">
+  <form class="filters" action="/products" method="GET">
+    <input type="search" name="search" placeholder="Search products" value="<%= filters && filters.search ? filters.search : '' %>">
+    <select name="sort">
+      <option value="newest" <%= (!filters || !filters.sort || filters.sort === 'newest') ? 'selected' : '' %>>Newest</option>
+      <option value="price_asc" <%= filters && filters.sort === 'price_asc' ? 'selected' : '' %>>Price: Low to High</option>
+      <option value="price_desc" <%= filters && filters.sort === 'price_desc' ? 'selected' : '' %>>Price: High to Low</option>
+      <option value="name" <%= filters && filters.sort === 'name' ? 'selected' : '' %>>Name</option>
+    </select>
 
-  <<%- include('../partials/footer') %>
+    <% if (brands && brands.length) { %>
+    <select name="brand">
+      <option value="">All Brands</option>
+      <% brands.forEach(b => { %>
+        <option value="<%= b.id %>" <%= filters && String(filters.brand) === String(b.id) ? 'selected' : '' %>><%= b.name %></option>
+      <% }) %>
+    </select>
+    <% } %>
+
+    <label>Price</label>
+    <input type="number" name="minPrice" placeholder="Min" value="<%= filters && filters.minPrice ? filters.minPrice : '' %>">
+    <input type="number" name="maxPrice" placeholder="Max" value="<%= filters && filters.maxPrice ? filters.maxPrice : '' %>">
+
+    <button class="btn" type="submit">Apply</button>
+  </form>
+</section>
+
+<% if (!products || products.length === 0) { %>
+<div class="empty-state">
+  <p>No products available.</p>
+</div>
+<% } else { %>
+<div class="product-grid">
+  <% products.forEach(product => { %>
+  <article class="product-card">
+    <% if (user) { %>
+    <button class="btn-wishlist-heart <%= wishlistIds.includes(product.id) ? 'active' : '' %>"
+            data-product-id="<%= product.id %>"
+            title="<%= wishlistIds.includes(product.id) ? 'Remove from wishlist' : 'Add to wishlist' %>"
+            aria-label="Toggle wishlist">
+      <span class="heart-icon"><%= wishlistIds.includes(product.id) ? '♥' : '♡' %></span>
+    </button>
+    <% } %>
+    <a href="/products/<%= product.slug || product.id %>" class="product-link" data-product-id="<%= product.id %>">
+      <div class="product-image">
+        <img src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="<%= product.name %>" loading="lazy">
+      </div>
+      <div class="product-info">
+        <h3><%= product.name %></h3>
+        <p class="product-category"><%= product.category_name || 'Uncategorized' %></p>
+        <div class="product-badges">
+          <% if (product.is_featured) { %><span class="badge featured">Featured</span><% } %>
+          <% if (product.is_trending) { %><span class="badge trending">Trending</span><% } %>
+          <% if (product.is_new_arrival) { %><span class="badge new">New</span><% } %>
+        </div>
+        <div class="product-meta-inline">
+          <% if (product.average_rating > 0) { %>
+          <span class="rating-stars-small">
+            <% for (let i = 1; i <= 5; i++) { %>
+              <span class="star <%= i <= Math.round(Number(product.average_rating)) ? 'filled' : '' %>">★</span>
+            <% } %>
+          </span>
+          <span class="rating-count">(<%= product.review_count || 0 %>)</span>
+          <% } %>
+        </div>
+        <% if (product.discount_price) { %>
+        <p class="product-price">
+          <span class="price-old">ZAR <%= product.price %></span>
+          <strong>ZAR <%= product.discount_price %></strong>
+        </p>
+        <% } else { %>
+        <p class="product-price">ZAR <%= product.price %></p>
+        <% } %>
+      </div>
+    </a>
+    <div class="product-actions">
+      <button class="btn btn-link quick-view" data-id="<%= product.id %>">Quick view</button>
+    </div>
+    <form action="/cart/add" method="POST" class="add-to-cart-form">
+      <input type="hidden" name="productId" value="<%= product.id %>">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="btn btn-primary btn-small" <%= product.stock_quantity <= 0 ? 'disabled' : '' %>>
+        <%= product.stock_quantity <= 0 ? 'Out of Stock' : 'Add to Cart' %>
+      </button>
+    </form>
+  </article>
+  <% }) %>
+</div>
+
+  <nav class="pagination">
+    <% const q = Object.assign({}, filters || {}); %>
+    <% if (page > 1) { q.page = page - 1; %>
+      <a href="/products?<%= new URLSearchParams(q).toString() %>" class="page prev">← Previous</a>
+    <% } %>
+    <% if (hasMore) { q.page = page + 1; %>
+      <a href="/products?<%= new URLSearchParams(q).toString() %>" class="page next">Next →</a>
+    <% } %>
+  </nav>
+<% } %>
+
+<%- include('../partials/footer') %>

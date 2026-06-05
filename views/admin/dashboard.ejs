@@ -1,4 +1,4 @@
-<<%- include('../partials/header') %> <h1>Admin Dashboard</h1>
+<%- include('../partials/header') %> <h1>Admin Dashboard</h1>
 
   <div class="admin-stats">
     <div class="stat-card">
@@ -31,9 +31,9 @@
         <tbody>
           <% orders.slice(0, 10).forEach(order => { %>
           <tr>
-            <td>#<%= order.id %></td>
+            <td><%= order.id %></td>
             <td><%= order.user_email %></td>
-            <td>$<%= order.total_price %></td>
+            <td>ZAR <%= order.total_price %></td>
             <td><span class="status-badge status-<%= order.status %>"><%= order.status %></span></td>
             <td><%= new Date(order.created_at).toLocaleDateString() %></td>
           </tr>
@@ -44,7 +44,11 @@
 
     <div class="admin-actions">
       <a href="/admin/products" class="btn btn-primary">Manage Products</a>
+      <a href="/admin/categories" class="btn btn-secondary">Manage Categories</a>
+      <a href="/admin/brands" class="btn btn-secondary">Manage Brands</a>
+      <a href="/admin/tags" class="btn btn-secondary">Manage Tags</a>
+      <a href="/admin/departments" class="btn btn-secondary">Manage Departments</a>
     </div>
   </div>
 
-  <<%- include('../partials/footer') %>
+  <%- include('../partials/footer') %>

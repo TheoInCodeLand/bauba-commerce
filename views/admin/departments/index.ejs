@@ -1,0 +1,32 @@
+<%- include('../../partials/header') %>
+<h1>Manage Departments</h1>
+
+<a href="/admin/departments/new" class="btn btn-primary">+ Add Department</a>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Active</th>
+      <th>Sort</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% departments.forEach(department => { %>
+    <tr>
+      <td><%= department.name %></td>
+      <td><%= department.is_active ? 'Yes' : 'No' %></td>
+      <td><%= department.sort_order %></td>
+      <td>
+        <a href="/admin/departments/<%= department.id %>/edit" class="btn btn-secondary btn-small">Edit</a>
+        <form action="/admin/departments/<%= department.id %>/delete" method="POST" class="inline-form">
+          <button type="submit" class="btn btn-danger btn-small">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../../partials/footer') %>

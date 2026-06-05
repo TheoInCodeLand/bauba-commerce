@@ -1,4 +1,4 @@
-<<%- include('../partials/header') %> <h1>Shopping Cart</h1>
+<%- include('../partials/header') %> <h1>Shopping Cart</h1>
 
   <% if (cart.items.length === 0) { %>
   <div class="empty-state">
@@ -14,7 +14,7 @@
 
         <div class="cart-item-details">
           <h3><a href="/products/<%= item.productId %>"><%= item.name %></a></h3>
-          <p class="item-price">$<%= item.price %> each</p>
+          <p class="item-price">ZAR <%= item.price %> each</p>
         </div>
 
         <form action="/cart/update" method="POST" class="cart-item-quantity">
@@ -24,7 +24,7 @@
         </form>
 
         <div class="cart-item-total">
-          $<%= item.itemTotal %>
+          ZAR <%= item.itemTotal %>
         </div>
 
         <form action="/cart/remove" method="POST" class="cart-item-remove">
@@ -38,7 +38,7 @@
     <div class="cart-summary">
       <div class="summary-row total">
         <span>Total</span>
-        <span>$<%= cart.total %></span>
+        <span>ZAR <%= cart.total %></span>
       </div>
 
       <div class="cart-actions">
@@ -49,4 +49,4 @@
   </div>
   <% } %>
 
-  <<%- include('../partials/footer') %>
+  <%- include('../partials/footer') %>

@@ -10,4 +10,16 @@
 
 <body>
   <%- include('navbar') %>
+  <header class="site-header" style="display: none;">
+    <div class="header-inner container">
+      <a class="brand" href="/">ShopMVP</a>
+      <form class="search-form" action="/products" method="GET">
+        <input type="search" name="search" placeholder="Search products, brands, categories..." aria-label="Search">
+        <button type="submit">Search</button>
+      </form>
+      <div class="header-actions">
+        <a href="/cart" class="cart-link">Cart (<span id="cart-count"><%= cartCount || 0 %></span>)</a>
+      </div>
+    </div>
+  </header>
   <main class="container">

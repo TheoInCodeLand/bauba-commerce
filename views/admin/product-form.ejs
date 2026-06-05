@@ -1,41 +1,31 @@
-<<%- include('../partials/header') %> <h1><%= product ? 'Edit Product' : 'Add Product' %></h1>
+<%- include('../partials/header') %>
+<h1><%= product ? 'Edit Product' : 'Add Product' %></h1>
 
-  <% if (errors && errors.length > 0) { %>
-  <div class="alert alert-error">
-    <ul>
-      <% errors.forEach(err => { %>
-      <li><%= err.msg %></li>
-      <% }) %>
-    </ul>
-  </div>
-  <% } %>
+<% if (errors && errors.length > 0) { %>
+<div class="alert alert-error">
+  <ul>
+    <% errors.forEach(err => { %>
+    <li><%= err.msg %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>
 
-  <form action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>" method="POST" class="admin-form">
+<form action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>" method="POST" class="admin-form">
+  <div class="form-grid">
     <div class="form-group">
       <label for="name">Product Name</label>
       <input type="text" id="name" name="name" value="<%= product ? product.name : '' %>" required>
     </div>
 
     <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" name="description" rows="4"><%= product ? product.description : '' %></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label for="price">Price ($)</label>
-        <input type="number" id="price" name="price" step="0.01" min="0" value="<%= product ? product.price : '' %>" required>
-      </div>
-
-      <div class="form-group">
-        <label for="stockQuantity">Stock Quantity</label>
-        <input type="number" id="stockQuantity" name="stockQuantity" min="0" value="<%= product ? product.stock_quantity : '0' %>" required>
-      </div>
+      <label for="shortDescription">Short Description</label>
+      <textarea id="shortDescription" name="shortDescription" rows="2"><%= product ? product.short_description : '' %></textarea>
     </div>
 
     <div class="form-group">
-      <label for="imageUrl">Image URL</label>
-      <input type="url" id="imageUrl" name="imageUrl" value="<%= product ? product.image_url : '' %>" placeholder="https://...">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4"><%= product ? product.description : '' %></textarea>
     </div>
 
     <div class="form-group">
@@ -50,10 +40,154 @@
       </select>
     </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary"><%= product ? 'Update Product' : 'Create Product' %></button>
-      <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+    <div class="form-group">
+      <label for="brandId">Brand</label>
+      <select id="brandId" name="brandId">
+        <option value="">— Select Brand —</option>
+        <% brands.forEach(brand => { %>
+        <option value="<%= brand.id %>" <%= product && product.brand_id == brand.id ? 'selected' : '' %>>
+          <%= brand.name %>
+        </option>
+        <% }) %>
+      </select>
     </div>
-  </form>
 
-  <<%- include('../partials/footer') %>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="price">Price</label>
+        <input type="number" id="price" name="price" step="0.01" min="0" value="<%= product ? product.price : '' %>" required>
+      </div>
+
+      <div class="form-group">
+        <label for="discountPrice">Discount Price</label>
+        <input type="number" id="discountPrice" name="discountPrice" step="0.01" min="0" value="<%= product && product.discount_price ? product.discount_price : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="costPrice">Cost Price</label>
+        <input type="number" id="costPrice" name="costPrice" step="0.01" min="0" value="<%= product && product.cost_price ? product.cost_price : '' %>">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="currency">Currency</label>
+        <input type="text" id="currency" name="currency" value="<%= product ? product.currency || 'ZAR' : 'ZAR' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="productType">Product Type</label>
+        <select id="productType" name="productType">
+          <option value="physical" <%= product && product.product_type === 'physical' ? 'selected' : '' %>>Physical</option>
+          <option value="digital" <%= product && product.product_type === 'digital' ? 'selected' : '' %>>Digital</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="stockQuantity">Stock Quantity</label>
+        <input type="number" id="stockQuantity" name="stockQuantity" min="0" value="<%= product ? product.stock_quantity : '0' %>" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="sku">SKU</label>
+        <input type="text" id="sku" name="sku" value="<%= product ? product.sku : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="barcode">Barcode</label>
+        <input type="text" id="barcode" name="barcode" value="<%= product ? product.barcode : '' %>">
+      </div>
+
+      <div class="form-group">
+        <label for="weight">Weight</label>
+        <input type="number" id="weight" name="weight" step="0.01" min="0" value="<%= product && product.weight ? product.weight : '' %>">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="dimensionsLength">Length</label>
+        <input type="number" id="dimensionsLength" name="dimensionsLength" step="0.01" min="0" value="<%= product && product.dimensions ? product.dimensions.length : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="dimensionsWidth">Width</label>
+        <input type="number" id="dimensionsWidth" name="dimensionsWidth" step="0.01" min="0" value="<%= product && product.dimensions ? product.dimensions.width : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="dimensionsHeight">Height</label>
+        <input type="number" id="dimensionsHeight" name="dimensionsHeight" step="0.01" min="0" value="<%= product && product.dimensions ? product.dimensions.height : '' %>">
+      </div>
+      <div class="form-group">
+        <label for="dimensionsUnit">Dimensions Unit</label>
+        <input type="text" id="dimensionsUnit" name="dimensionsUnit" value="<%= product && product.dimensions ? product.dimensions.unit : '' %>">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="imageUrl">Main Image URL</label>
+      <input type="url" id="imageUrl" name="imageUrl" value="<%= product ? product.image_url : '' %>" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label for="gallery">Gallery Image URLs (comma separated)</label>
+      <textarea id="gallery" name="gallery" rows="2"><%= product && product.gallery ? (Array.isArray(product.gallery) ? product.gallery.join(', ') : product.gallery) : '' %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="videoUrl">Video URL</label>
+      <input type="url" id="videoUrl" name="videoUrl" value="<%= product ? product.video_url : '' %>" placeholder="https://...">
+    </div>
+
+    <div class="form-row">
+      <div class="form-checkbox">
+        <label>
+          <input type="checkbox" name="shippingRequired" <%= product && product.shipping_required === false ? '' : 'checked' %>> Shipping Required
+        </label>
+      </div>
+      <div class="form-checkbox">
+        <label>
+          <input type="checkbox" name="isActive" <%= product && product.is_active === false ? '' : 'checked' %>> Active
+        </label>
+      </div>
+      <div class="form-checkbox">
+        <label>
+          <input type="checkbox" name="isFeatured" <%= product && product.is_featured ? 'checked' : '' %>> Featured
+        </label>
+      </div>
+      <div class="form-checkbox">
+        <label>
+          <input type="checkbox" name="isTrending" <%= product && product.is_trending ? 'checked' : '' %>> Trending
+        </label>
+      </div>
+      <div class="form-checkbox">
+        <label>
+          <input type="checkbox" name="isNewArrival" <%= product && product.is_new_arrival ? 'checked' : '' %>> New Arrival
+        </label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="publishedAt">Published Date</label>
+      <input type="date" id="publishedAt" name="publishedAt" value="<%= product && product.published_at ? product.published_at.toISOString().split('T')[0] : '' %>">
+    </div>
+
+    <div class="form-group">
+      <label for="seoTitle">SEO Title</label>
+      <input type="text" id="seoTitle" name="seoTitle" value="<%= product ? product.seo_title : '' %>">
+    </div>
+
+    <div class="form-group">
+      <label for="seoDescription">SEO Description</label>
+      <textarea id="seoDescription" name="seoDescription" rows="3"><%= product ? product.seo_description : '' %></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= product ? 'Update Product' : 'Create Product' %></button>
+    <a href="/admin/products" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<%- include('../partials/footer') %>

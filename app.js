@@ -14,7 +14,13 @@ const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const webhookRoutes = require('./routes/webhookRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const { startCleanupJob } = require('./services/cleanupService');
+const wishlistService = require('./services/wishlistService');
+const productService = require('./services/productService');
+const brandService = require('./services/brandService');
+const departmentService = require('./services/departmentService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,9 +57,21 @@ app.use(
 );
 
 // Make user session available to all EJS templates
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.cartCount = req.session.cart ? req.session.cart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+
+    // Wishlist count for logged-in users
+    if (req.session.user) {
+        try {
+            res.locals.wishlistCount = await wishlistService.getWishlistCount(req.session.user.id);
+        } catch (err) {
+            res.locals.wishlistCount = 0;
+        }
+    } else {
+        res.locals.wishlistCount = 0;
+    }
+
     next();
 });
 
@@ -63,14 +81,45 @@ app.use((req, res, next) => {
 
 app.use('/', authRoutes);
 app.use('/products', productRoutes);
+app.use('/products', reviewRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
 app.use('/admin', adminRoutes);
 app.use('/webhooks', webhookRoutes);
+app.use('/wishlist', wishlistRoutes);
 
-// Home page — redirect to products
-app.get('/', (req, res) => {
-    res.redirect('/products');
+// Home page — rich landing page
+app.get('/', async (req, res) => {
+    try {
+        const recentIds = req.session.recentlyViewed || [];
+        const recentCategory = req.session.recentCategory || null;
+
+        const [brands, discounted, departments, trending, newArrivals, recentlyViewed] = await Promise.all([
+            brandService.getAllBrands(),
+            productService.getDiscountedProducts(16),
+            departmentService.getAllDepartments(),
+            productService.getTrendingProducts(8),
+            productService.getNewArrivals(8),
+            productService.getRecentlyViewedProducts(recentIds),
+        ]);
+
+        res.render('home', {
+            title: 'Welcome',
+            brands,
+            discounted,
+            departments,
+            trending,
+            newArrivals,
+            recentlyViewed,
+            recentCategory,
+        });
+    } catch (err) {
+        console.error('Home page error:', err);
+        res.status(500).render('partials/error', {
+            title: 'Error',
+            message: 'Unable to load the home page',
+        });
+    }
 });
 
 // 404 handler
@@ -93,7 +142,7 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`bauba running on http://localhost:${PORT}`);
 });
 
 startCleanupJob();

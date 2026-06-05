@@ -9,11 +9,11 @@ const pool = new Pool({
 });
 
 pool.on('connect', () => {
-    console.log('PostgreSQL connected');
+    console.log('db connected');
 });
 
 pool.on('error', (err) => {
-    console.error('PostgreSQL connection error:', err.message);
+    console.error('db connection error:', err.message);
 });
 
 const query = (text, params) => pool.query(text, params);

@@ -1,0 +1,69 @@
+<%- include('../../partials/header') %>
+<h1><%= category ? 'Edit Category' : 'Add Category' %></h1>
+
+<% if (errors && errors.length > 0) { %>
+<div class="alert alert-error">
+  <ul>
+    <% errors.forEach(err => { %>
+    <li><%= err.msg %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>
+
+<form action="<%= category ? '/admin/categories/' + category.id : '/admin/categories' %>" method="POST" class="admin-form">
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" value="<%= category ? category.name : '' %>" required>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3"><%= category ? category.description : '' %></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="departmentId">Department</label>
+      <select id="departmentId" name="departmentId">
+        <option value="">— Select Department —</option>
+        <% departments.forEach(department => { %>
+        <option value="<%= department.id %>" <%= category && category.department_id == department.id ? 'selected' : '' %>><%= department.name %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="parentId">Parent Category</label>
+      <select id="parentId" name="parentId">
+        <option value="">— None —</option>
+        <% categories.forEach(parent => { %>
+        <option value="<%= parent.id %>" <%= category && category.parent_id == parent.id ? 'selected' : '' %>><%= parent.name %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="imageUrl">Image URL</label>
+      <input type="url" id="imageUrl" name="imageUrl" value="<%= category ? category.image_url : '' %>" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label for="sortOrder">Sort Order</label>
+      <input type="number" id="sortOrder" name="sortOrder" min="0" value="<%= category ? category.sort_order : '0' %>">
+    </div>
+
+    <div class="form-checkbox">
+      <label>
+        <input type="checkbox" name="isFeatured" <%= category && category.is_featured ? 'checked' : '' %>> Featured
+      </label>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary"><%= category ? 'Update Category' : 'Create Category' %></button>
+    <a href="/admin/categories" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>
+
+<%- include('../../partials/footer') %>

@@ -1,0 +1,46 @@
+<%- include('../../partials/header.ejs') %>
+<h1>Manage Categories</h1>
+
+<a href="/admin/categories/new" class="btn btn-primary">+ Add Category</a>
+
+<% if (errors && errors.length > 0) { %>
+<div class="alert alert-error">
+  <ul>
+    <% errors.forEach(err => { %>
+    <li><%= err.msg %></li>
+    <% }) %>
+  </ul>
+</div>
+<% } %>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Department</th>
+      <th>Parent</th>
+      <th>Featured</th>
+      <th>Sort</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% categories.forEach(category => { %>
+    <tr>
+      <td><%= category.name %></td>
+      <td><%= category.department_name || '-' %></td>
+      <td><%= category.parent_name || '-' %></td>
+      <td><%= category.is_featured ? 'Yes' : 'No' %></td>
+      <td><%= category.sort_order %></td>
+      <td>
+        <a href="/admin/categories/<%= category.id %>/edit" class="btn btn-secondary btn-small">Edit</a>
+        <form action="/admin/categories/<%= category.id %>/delete" method="POST" class="inline-form">
+          <button type="submit" class="btn btn-danger btn-small">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../../partials/footer') %>

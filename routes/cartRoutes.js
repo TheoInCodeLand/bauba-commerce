@@ -29,6 +29,13 @@ router.post('/add', async (req, res) => {
         );
 
         // Redirect back to product or cart
+        const cartCount = (req.session.cart || []).reduce((s, it) => s + (it.quantity || 0), 0);
+
+        // If JSON requested (AJAX), return JSON payload
+        if (req.headers.accept && req.headers.accept.includes('application/json')) {
+            return res.json({ message: 'Added to cart', cartCount });
+        }
+
         const redirectTo = req.get('Referer') || '/cart';
         res.redirect(redirectTo);
 

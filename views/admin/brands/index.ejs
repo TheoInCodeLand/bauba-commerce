@@ -1,0 +1,32 @@
+<%- include('../../partials/header') %>
+<h1>Manage Brands</h1>
+
+<a href="/admin/brands/new" class="btn btn-primary">+ Add Brand</a>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Active</th>
+      <th>Products</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% brands.forEach(brand => { %>
+    <tr>
+      <td><%= brand.name %></td>
+      <td><%= brand.is_active ? 'Yes' : 'No' %></td>
+      <td><%= brand.product_count != null ? brand.product_count : '-' %></td>
+      <td>
+        <a href="/admin/brands/<%= brand.id %>/edit" class="btn btn-secondary btn-small">Edit</a>
+        <form action="/admin/brands/<%= brand.id %>/delete" method="POST" class="inline-form">
+          <button type="submit" class="btn btn-danger btn-small">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../../partials/footer') %>

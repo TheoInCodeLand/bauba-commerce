@@ -1,4 +1,4 @@
-<<%- include('../partials/header') %> <h1><%= singleOrder ? 'Order Details' : 'My Orders' %></h1>
+<%- include('../partials/header') %> <h1><%= singleOrder ? 'Order Details' : 'My Orders' %></h1>
 
   <% if (orders.length === 0) { %>
   <div class="empty-state">
@@ -18,7 +18,7 @@
       </div>
 
       <div class="order-meta">
-        <p><strong>Total:</strong> $<%= order.total_price %></p>
+        <p><strong>Total:</strong> ZAR <%= order.total_price %></p>
         <p><strong>Items:</strong> <%= order.item_count %></p>
         <% if (order.shipping_address) { %>
         <p><strong>Ship to:</strong> <%= order.shipping_address %></p>
@@ -33,7 +33,7 @@
           <img src="<%= item.image_url || '/images/placeholder.jpg' %>" alt="<%= item.product_name %>" class="order-item-thumb">
           <div>
             <p><%= item.product_name %></p>
-            <p class="text-muted">Qty: <%= item.quantity %> @ $<%= item.price %></p>
+            <p class="text-muted">Qty: <%= item.quantity %> @ ZAR <%= item.price %></p>
           </div>
         </div>
         <% }) %>
@@ -48,4 +48,4 @@
   </div>
   <% } %>
 
-  <<%- include('../partials/footer') %>
+  <%- include('../partials/footer') %>

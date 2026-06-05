@@ -1,32 +1,328 @@
-<<%- include('../partials/header') %> <<article class="product-detail">
-  <div class="product-detail-image">
-    <img src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="<%= product.name %>">
+<%- include('../partials/header') %>
+<article class="product-detail">
+  <div class="product-detail-gallery">
+    <div class="product-detail-image">
+      <img id="main-product-image" src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="<%= product.name %>">
+    </div>
+    <% if (product.gallery && product.gallery.length) { %>
+    <div class="gallery-grid">
+      <div class="gallery-item <%= !product.image_url ? '' : 'active' %>" data-image="<%= product.image_url || '/images/placeholder.jpg' %>">
+        <img src="<%= product.image_url || '/images/placeholder.jpg' %>" alt="Main image" loading="lazy">
+      </div>
+      <% product.gallery.forEach(imageUrl => { %>
+      <div class="gallery-item" data-image="<%= imageUrl %>">
+        <img src="<%= imageUrl %>" alt="Gallery image" loading="lazy">
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
   </div>
 
   <div class="product-detail-info">
-    <h1><%= product.name %></h1>
-    <p class="product-category"><%= product.category_name || 'Uncategorized' %></p>
-    <p class="product-price price-large">$<%= product.price %></p>
+    <div class="detail-top-row">
+      <h1><%= product.name %></h1>
+      <% if (user) { %>
+      <button class="btn-wishlist-heart detail-heart <%= wishlistIds.includes(product.id) ? 'active' : '' %>"
+              data-product-id="<%= product.id %>"
+              title="<%= wishlistIds.includes(product.id) ? 'Remove from wishlist' : 'Add to wishlist' %>">
+        <span class="heart-icon"><%= wishlistIds.includes(product.id) ? '♥' : '♡' %></span>
+      </button>
+      <% } %>
+    </div>
+    <p class="product-category"><%= product.category_name || 'Uncategorized' %> <% if (product.brand_name) { %> • <%= product.brand_name %><% } %></p>
+
+    <%/* Rating Summary */%>
+    <div class="rating-summary" id="rating-summary">
+      <div class="rating-stars">
+        <% const avg = Number(reviewStats.average) || 0; %>
+        <% for (let i = 1; i <= 5; i++) { %>
+          <span class="star <%= i <= Math.round(avg) ? 'filled' : '' %>">★</span>
+        <% } %>
+      </div>
+      <span class="rating-average"><%= avg %></span>
+      <span class="rating-count">(<%= reviewStats.total %> review<%= reviewStats.total !== 1 ? 's' : '' %>)</span>
+      <a href="#reviews-section" class="rating-link">Read reviews</a>
+    </div>
+
+    <% if (product.discount_price) { %>
+    <p class="product-price price-large">
+      <span class="price-old">ZAR <%= product.price %></span>
+      <strong id="display-price">ZAR <%= product.discount_price %></strong>
+    </p>
+    <% } else { %>
+    <p class="product-price price-large" id="display-price">ZAR <%= product.price %></p>
+    <% } %>
+
+    <% if (product.short_description) { %>
+    <p class="product-subtitle"><%= product.short_description %></p>
+    <% } %>
 
     <div class="product-description">
       <p><%= product.description || 'No description available.' %></p>
     </div>
 
-    <p class="stock-info">In Stock: <%= product.stock_quantity %></p>
+    <%/* ========== VARIANT SELECTORS ========== */%>
+    <% if (product.attributeGroups && product.attributeGroups.length > 0) { %>
+    <div class="variant-selector" id="variant-selector">
+      <% product.attributeGroups.forEach(group => { %>
+      <div class="variant-group" data-attribute-id="<%= group.id %>">
+        <label class="variant-label"><%= group.name %>: <span class="variant-selected-value" id="selected-<%= group.slug %>"></span></label>
+        <div class="variant-options">
+          <% if (group.type === 'color') { %>
+            <% group.values.forEach(val => { %>
+            <button type="button"
+                    class="variant-swatch color-swatch"
+                    data-value-id="<%= val.id %>"
+                    data-attribute-id="<%= group.id %>"
+                    data-value="<%= val.value %>"
+                    style="background-color: <%= val.colorHex || '#ccc' %>"
+                    title="<%= val.value %>">
+              <span class="swatch-check">✓</span>
+            </button>
+            <% }) %>
+          <% } else { %>
+            <% group.values.forEach(val => { %>
+            <button type="button"
+                    class="variant-swatch text-pill"
+                    data-value-id="<%= val.id %>"
+                    data-attribute-id="<%= group.id %>"
+                    data-value="<%= val.value %>">
+              <%= val.value %>
+            </button>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+      <% }) %>
+    </div>
 
-    <form action="/cart/add" method="POST" class="add-to-cart-form detail-form">
+    <%/* Embed variant data for JS */%>
+    <script>
+      window.__variants = <%- JSON.stringify(product.variants.map(v => ({
+        id: v.id,
+        sku: v.sku,
+        priceOverride: v.price_override,
+        stockQuantity: v.stock_quantity,
+        imageUrl: v.image_url,
+      }))) %>;
+      window.__variantAttributeMap = <%- JSON.stringify(product.variantAttributeMap) %>;
+      window.__basePrice = '<%= product.discount_price || product.price %>';
+      window.__baseStock = <%= product.stock_quantity %>;
+      window.__baseImage = '<%= product.image_url || "/images/placeholder.jpg" %>';
+    </script>
+    <% } else if (product.variants && product.variants.length) { %>
+    <%/* Fallback: simple variant list if no attribute groups */%>
+    <div class="product-variants">
+      <h3>Available Options</h3>
+      <div class="variant-pills-simple">
+        <% product.variants.forEach(variant => { %>
+        <div class="variant-pill-simple <%= variant.stock_quantity <= 0 ? 'out-of-stock' : '' %>">
+          <strong><%= variant.sku || 'Option' %></strong>
+          <span class="variant-pill-price">ZAR <%= variant.price_override || product.price %></span>
+          <span class="variant-pill-stock"><%= variant.stock_quantity > 0 ? variant.stock_quantity + ' in stock' : 'Out of stock' %></span>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <div class="product-meta">
+      <p><strong>SKU:</strong> <span id="display-sku"><%= product.sku || 'N/A' %></span></p>
+      <p><strong>Stock:</strong> <span id="display-stock" class="<%= product.stock_quantity > 0 ? 'in-stock' : 'out-of-stock-text' %>"><%= product.stock_quantity > 0 ? product.stock_quantity + ' available' : 'Out of stock' %></span></p>
+      <p><strong>Type:</strong> <%= product.product_type || 'physical' %></p>
+      <p><strong>Shipping:</strong> <%= product.shipping_required === false ? 'Not required' : 'Required' %></p>
+      <% if (product.weight) { %>
+      <p><strong>Weight:</strong> <%= product.weight %> kg</p>
+      <% } %>
+      <% if (product.dimensions) { %>
+      <p><strong>Dimensions:</strong>
+        <%= product.dimensions.length || '—' %> x
+        <%= product.dimensions.width || '—' %> x
+        <%= product.dimensions.height || '—' %>
+        <%= product.dimensions.unit || 'units' %>
+      </p>
+      <% } %>
+    </div>
+
+    <% if (product.tags && product.tags.length) { %>
+    <div class="product-tags">
+      <strong>Tags:</strong>
+      <% product.tags.forEach(tag => { %>
+        <a href="/products?tags=<%= tag.slug %>"><%= tag.name %></a>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <form action="/cart/add" method="POST" class="add-to-cart-form detail-form" id="add-to-cart-form">
       <input type="hidden" name="productId" value="<%= product.id %>">
+      <input type="hidden" name="variantId" id="variant-id-input" value="">
 
       <div class="quantity-selector">
         <label for="quantity">Quantity:</label>
-        <input type="number" id="quantity" name="quantity" value="1" min="1" max="<%= product.stock_quantity %>">
+        <div class="qty-controls">
+          <button type="button" class="qty-btn qty-minus" id="qty-minus">−</button>
+          <input type="number" id="quantity" name="quantity" value="1" min="1" max="<%= product.stock_quantity %>">
+          <button type="button" class="qty-btn qty-plus" id="qty-plus">+</button>
+        </div>
       </div>
 
-      <button type="submit" class="btn btn-primary btn-large">Add to Cart</button>
+      <button type="submit" class="btn btn-primary btn-large" id="add-to-cart-btn" <%= product.stock_quantity <= 0 ? 'disabled' : '' %>>
+        <%= product.stock_quantity <= 0 ? 'Out of Stock' : 'Add to Cart' %>
+      </button>
     </form>
 
     <a href="/products" class="back-link">← Back to Products</a>
   </div>
-  </article>
+</article>
 
-  <<%- include('../partials/footer') %>
+<%/* ========== RELATED PRODUCTS ========== */%>
+<% if (relatedProducts && relatedProducts.length > 0) { %>
+<section class="related-products" id="related-products">
+  <h2 class="section-title">You might also like</h2>
+  <div class="related-grid">
+    <% relatedProducts.forEach(rp => { %>
+    <article class="product-card related-card">
+      <a href="/products/<%= rp.slug || rp.id %>" class="product-link">
+        <div class="product-image">
+          <img src="<%= rp.image_url || '/images/placeholder.jpg' %>" alt="<%= rp.name %>" loading="lazy">
+        </div>
+        <div class="product-info">
+          <h3><%= rp.name %></h3>
+          <p class="product-category"><%= rp.category_name || '' %></p>
+          <% if (rp.average_rating > 0) { %>
+          <div class="rating-stars-small">
+            <% for (let i = 1; i <= 5; i++) { %>
+              <span class="star <%= i <= Math.round(Number(rp.average_rating)) ? 'filled' : '' %>">★</span>
+            <% } %>
+            <span class="rating-count">(<%= rp.review_count || 0 %>)</span>
+          </div>
+          <% } %>
+          <% if (rp.discount_price) { %>
+          <p class="product-price">
+            <span class="price-old">ZAR <%= rp.price %></span>
+            <strong>ZAR <%= rp.discount_price %></strong>
+          </p>
+          <% } else { %>
+          <p class="product-price">ZAR <%= rp.price %></p>
+          <% } %>
+        </div>
+      </a>
+      <form action="/cart/add" method="POST" class="add-to-cart-form">
+        <input type="hidden" name="productId" value="<%= rp.id %>">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="btn btn-primary btn-small" <%= rp.stock_quantity <= 0 ? 'disabled' : '' %>>
+          <%= rp.stock_quantity <= 0 ? 'Sold Out' : 'Add to Cart' %>
+        </button>
+      </form>
+    </article>
+    <% }) %>
+  </div>
+</section>
+<% } %>
+
+<%/* ========== REVIEWS SECTION ========== */%>
+<section class="reviews-section" id="reviews-section">
+  <h2 class="section-title">Customer Reviews</h2>
+
+  <%/* Rating Breakdown */%>
+  <div class="review-overview">
+    <div class="review-overview-left">
+      <div class="review-big-rating"><%= Number(reviewStats.average) || 0 %></div>
+      <div class="rating-stars review-stars-big">
+        <% for (let i = 1; i <= 5; i++) { %>
+          <span class="star <%= i <= Math.round(Number(reviewStats.average)) ? 'filled' : '' %>">★</span>
+        <% } %>
+      </div>
+      <p class="review-total-count"><%= reviewStats.total %> review<%= reviewStats.total !== 1 ? 's' : '' %></p>
+    </div>
+    <div class="review-overview-right">
+      <% [5,4,3,2,1].forEach(n => { %>
+      <div class="rating-bar-row">
+        <span class="bar-label"><%= n %> ★</span>
+        <div class="rating-bar">
+          <div class="rating-bar-fill" style="width: <%= reviewStats.total > 0 ? Math.round((reviewStats[['','one_star','two_star','three_star','four_star','five_star'][n]] / reviewStats.total) * 100) : 0 %>%"></div>
+        </div>
+        <span class="bar-count"><%= reviewStats[['','one_star','two_star','three_star','four_star','five_star'][n]] %></span>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <%/* Review Form */%>
+  <% if (user && !hasReviewed) { %>
+  <div class="review-form-container" id="review-form-container">
+    <h3>Write a Review</h3>
+    <form action="/products/<%= product.id %>/reviews" method="POST" class="review-form" id="review-form">
+      <div class="form-group">
+        <label>Your Rating <span class="required">*</span></label>
+        <div class="star-selector" id="star-selector">
+          <% for (let i = 1; i <= 5; i++) { %>
+          <button type="button" class="star-select-btn" data-rating="<%= i %>" aria-label="<%= i %> star<%= i > 1 ? 's' : '' %>">★</button>
+          <% } %>
+        </div>
+        <input type="hidden" name="rating" id="rating-input" value="" required>
+      </div>
+
+      <div class="form-group">
+        <label for="review-title">Title (optional)</label>
+        <input type="text" id="review-title" name="title" placeholder="Summarize your experience" maxlength="255">
+      </div>
+
+      <div class="form-group">
+        <label for="review-body">Your Review</label>
+        <textarea id="review-body" name="body" rows="4" placeholder="Tell others what you think about this product..."></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submit-review-btn" disabled>Submit Review</button>
+    </form>
+  </div>
+  <% } else if (!user) { %>
+  <div class="review-login-prompt">
+    <p><a href="/login">Log in</a> to write a review.</p>
+  </div>
+  <% } else if (hasReviewed) { %>
+  <div class="review-login-prompt">
+    <p>✓ You've already reviewed this product.</p>
+  </div>
+  <% } %>
+
+  <%/* Reviews List */%>
+  <% if (reviews && reviews.length > 0) { %>
+  <div class="reviews-list" id="reviews-list">
+    <% reviews.forEach(review => { %>
+    <div class="review-card">
+      <div class="review-card-header">
+        <div class="review-card-left">
+          <div class="rating-stars-small">
+            <% for (let i = 1; i <= 5; i++) { %>
+              <span class="star <%= i <= review.rating ? 'filled' : '' %>">★</span>
+            <% } %>
+          </div>
+          <% if (review.title) { %>
+          <h4 class="review-title"><%= review.title %></h4>
+          <% } %>
+        </div>
+        <div class="review-card-meta">
+          <span class="review-author"><%= review.user_email.split('@')[0] %></span>
+          <span class="review-date"><%= new Date(review.created_at).toLocaleDateString('en-ZA', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+        </div>
+      </div>
+      <% if (review.body) { %>
+      <p class="review-body"><%= review.body %></p>
+      <% } %>
+      <% if (user && (user.id === review.user_id || user.is_admin)) { %>
+      <form action="/products/<%= product.id %>/reviews/<%= review.id %>/delete" method="POST" class="review-delete-form">
+        <button type="submit" class="btn btn-link btn-danger-text" onclick="return confirm('Delete this review?')">Delete</button>
+      </form>
+      <% } %>
+    </div>
+    <% }) %>
+  </div>
+  <% } else { %>
+  <div class="reviews-empty">
+    <p>No reviews yet. Be the first to share your thoughts!</p>
+  </div>
+  <% } %>
+</section>
+
+<%- include('../partials/footer') %>

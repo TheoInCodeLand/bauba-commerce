@@ -1,0 +1,30 @@
+<%- include('../partials/header') %>
+<h1>Manage Tags</h1>
+
+<a href="/admin/tags/new" class="btn btn-primary">+ Add Tag</a>
+
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% tags.forEach(tag => { %>
+    <tr>
+      <td><%= tag.name %></td>
+      <td><%= tag.type %></td>
+      <td>
+        <a href="/admin/tags/<%= tag.id %>/edit" class="btn btn-secondary btn-small">Edit</a>
+        <form action="/admin/tags/<%= tag.id %>/delete" method="POST" class="inline-form">
+          <button type="submit" class="btn btn-danger btn-small">Delete</button>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+
+<%- include('../partials/footer') %>

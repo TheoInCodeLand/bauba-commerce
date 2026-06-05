@@ -1,4 +1,4 @@
-<<%- include('../partials/header') %> <h1>Checkout</h1>
+<%- include('../partials/header') %> <h1>Checkout</h1>
 
   <% if (error) { %>
   <div class="alert alert-error"><%= error %></div>
@@ -25,16 +25,16 @@
         <% cart.items.forEach(item => { %>
         <div class="checkout-item">
           <span><%= item.name %> × <%= item.quantity %></span>
-          <span>$<%= item.itemTotal %></span>
+          <span>ZAR <%= item.itemTotal %></span>
         </div>
         <% }) %>
       </div>
 
       <div class="checkout-total">
         <strong>Total</strong>
-        <strong>$<%= cart.total %></strong>
+        <strong>ZAR <%= cart.total %></strong>
       </div>
     </div>
   </div>
 
-  <<%- include('../partials/footer') %>
+  <%- include('../partials/footer') %>
