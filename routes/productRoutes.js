@@ -15,12 +15,17 @@ router.get('/', async (req, res) => {
     try {
         // build filters from query string
         const filters = {};
-        if (req.query.category) filters.categoryId = parseInt(req.query.category, 10) || req.query.category;
+        const cat = req.query.category || req.query.department;
+        if (cat) filters.categoryId = parseInt(cat, 10) || cat;
         if (req.query.brand) filters.brandId = parseInt(req.query.brand, 10) || req.query.brand;
         if (req.query.search) filters.search = req.query.search;
-        if (req.query.tags) filters.tags = req.query.tags;
+        
+        const tags = req.query.tags || req.query.tag;
+        if (tags) filters.tags = tags;
+        
         if (req.query.minPrice) filters.minPrice = Number(req.query.minPrice);
         if (req.query.maxPrice) filters.maxPrice = Number(req.query.maxPrice);
+        if (req.query.isDiscounted === 'true') filters.isDiscounted = true;
         if (req.query.sort) filters.sort = req.query.sort;
         if (req.query.page) filters.page = parseInt(req.query.page, 10);
         if (req.query.pageSize) filters.pageSize = parseInt(req.query.pageSize, 10);
@@ -38,17 +43,17 @@ router.get('/', async (req, res) => {
         const { products, page, pageSize, hasMore } = result;
 
         // Track last browsed category for the home page
-        if (req.query.category && categories.length) {
-            const cat = categories.find(c => String(c.id) === String(req.query.category) || c.slug === req.query.category);
-            if (cat) req.session.recentCategory = { id: cat.id, name: cat.name, slug: cat.slug };
+        if (cat && categories.length) {
+            const categoryObj = categories.find(c => String(c.id) === String(cat) || c.slug === cat);
+            if (categoryObj) req.session.recentCategory = { id: categoryObj.id, name: categoryObj.name, slug: categoryObj.slug };
         }
 
         res.render('products/list', {
-            title: req.query.search ? `Search: ${req.query.search}` : (req.query.category ? 'Products by Category' : 'All Products'),
+            title: req.query.search ? `Search: ${req.query.search}` : (cat ? 'Products by Category' : 'All Products'),
             products,
             categories,
             brands,
-            selectedCategory: req.query.category || null,
+            selectedCategory: cat || null,
             filters: req.query,
             page,
             pageSize,

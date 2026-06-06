@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' — Bauba' : 'Bauba — Shop Smarter, Live Better' %></title>
+  <meta name="description" content="Discover thousands of products across electronics, fashion, home & more. Shop discounts, trending deals, and new arrivals every day at Bauba.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/home.css">
+</head>
+<body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : 'home-page' %>">
+
+  <!-- ══════════════════════════════════════
+       UTILITY BAR
+  ══════════════════════════════════════ -->
+  <div class="util-bar">
+    <div class="util-left">
+      <a href="#">Help Centre</a>
+      <a href="#">Sell on Bauba</a>
+    </div>
+    <div class="util-right">
+      <% if (typeof user !== 'undefined' && user) { %>
+        <span>Hi <%= user.name || user.email || 'There' %></span>
+        <a href="/logout">Logout</a>
+        <a href="/orders">Orders</a>
+        <a href="/account">My Account</a>
+      <% } else { %>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════ -->
+  <header class="site-header">
+    <button class="mob-menu-btn" id="mobMenuBtn" aria-label="Menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    <a href="/" class="logo">
+      <span class="logo-word">bauba</span>
+      <span class="logo-dot">.com</span>
+    </a>
+    <div class="search-wrap">
+      <form action="/products" method="GET" style="display: flex; width: 100%;">
+        <input type="text" name="search" placeholder="Search for products, brands..." value="<%= typeof filters !== 'undefined' && filters.search ? filters.search : '' %>">
+        <button type="submit" class="search-btn" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
+      </form>
+    </div>
+    <div class="header-actions">
+      <a href="/wishlist" class="wishlist-btn" aria-label="Wishlist">
+        <i class="fas fa-heart"></i>
+        <% if (typeof wishlistCount !== 'undefined' && wishlistCount > 0) { %><span class="wishlist-badge"><%= wishlistCount %></span><% } %>
+      </a>
+      <a href="/cart" class="cart-btn" aria-label="Cart">
+        <i class="fas fa-cart-shopping" style="font-size:14px"></i>
+        <% if (typeof cartCount !== 'undefined' && cartCount > 0) { %><span class="cart-badge"><%= cartCount %></span><% } %>
+      </a>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════
+       DESKTOP NAVBAR
+  ══════════════════════════════════════ -->
+  <nav class="navbar">
+    <button class="dept-btn" id="deptToggle">
+      <i class="fas fa-bars"></i>
+      Shop by Department
+      <i class="fas fa-chevron-down chev"></i>
+    </button>
+    <div class="nav-links">
+      <a href="/products?tag=alot-for-less" class="nav-link">ALOT For Less</a>
+      <a href="/products?tag=sale" class="nav-link">Thanksalot Sale</a>
+      <a href="/products?tag=winter" class="nav-link">Winter</a>
+      <a href="/products?sort=newest" class="nav-link">New Arrivals</a>
+      <a href="/products?tag=more" class="nav-link more">BaubaMORE</a>
+      <a href="/products" class="nav-link">Brands Store</a>
+      <a href="/products?tag=deals" class="nav-link">Deals &amp; Promotions</a>
+      <a href="/products?tag=clearance" class="nav-link">Clearance</a>
+    </div>
+
+    <!-- Dept Dropdown -->
+    <div class="dept-dd" id="deptDd">
+      <% if (typeof departments !== 'undefined' && departments && departments.length > 0) { %>
+        <% departments.forEach(dept => { %>
+          <a href="/products?department=<%= dept.id %>"><%= dept.name %> <i class="fas fa-chevron-right"></i></a>
+        <% }) %>
+      <% } %>
+      <div class="more-deals-bar"><span>bauba</span>more deals</div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       MOBILE SLIM NAVBAR
+  ══════════════════════════════════════ -->
+  <nav class="mob-navbar">
+    <a href="/products?tag=alot-for-less">ALOT For Less</a>
+    <a href="/products?tag=sale">Thanksalot Sale</a>
+    <a href="/products?tag=winter">Winter</a>
+    <a href="/products?sort=newest">New Arrivals</a>
+    <a class="more" href="/products?tag=more">BaubaMORE</a>
+    <a href="/products">Brands Store</a>
+    <a href="/products?tag=deals">Deals &amp; Promotions</a>
+    <a href="/products?tag=clearance">Clearance</a>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       MOBILE DRAWER
+  ══════════════════════════════════════ -->
+  <div class="mob-overlay" id="mobOverlay"></div>
+  <div class="mob-drawer" id="mobDrawer">
+    <div class="mob-drawer-head">
+      Shop by Department
+      <button class="mob-close-btn" id="mobCloseBtn"><i class="fas fa-times"></i></button>
+    </div>
+    <% if (typeof departments !== 'undefined' && departments && departments.length > 0) { %>
+      <% departments.forEach(dept => { %>
+        <a href="/products?department=<%= dept.id %>"><%= dept.name %> <i class="fas fa-chevron-right"></i></a>
+      <% }) %>
+    <% } %>
+    <div class="more-deals-bar"><span>bauba</span>more deals</div>
+    <div class="mob-nav-links">
+      <a href="/products?tag=alot-for-less">ALOT For Less <i class="fas fa-chevron-right"></i></a>
+      <a href="/products?tag=sale">Thanksalot Sale <i class="fas fa-chevron-right"></i></a>
+      <a href="/products?tag=winter">Winter <i class="fas fa-chevron-right"></i></a>
+      <a href="/products?sort=newest">New Arrivals <i class="fas fa-chevron-right"></i></a>
+      <a href="/products?tag=more" style="color:var(--red)">BaubaMORE <i class="fas fa-chevron-right"></i></a>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="page">

@@ -1,0 +1,281 @@
+  <!-- ══════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════ -->
+  <footer>
+    <div class="footer-main">
+      <div class="footer-col">
+        <h4>Shop</h4>
+        <a href="/products?tag=deals">Deals</a>
+        <a href="/products?tag=alot-for-less">ALOT For Less</a>
+        <a href="/products?tag=clearance">Clearance Sale</a>
+        <a href="#">Gift Vouchers</a>
+        <a href="/products?tag=more">BaubaMORE Deals</a>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <a href="/account">My Account</a>
+        <a href="/orders">Track Order</a>
+        <a href="#">Returns</a>
+        <a href="#">Invoices</a>
+        <a href="#">Coupons</a>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <a href="#">Help Centre</a>
+        <a href="#">Contact Us</a>
+        <a href="#">Returns</a>
+        <a href="#">Shipping &amp; Delivery</a>
+        <a href="#">Pickup Points</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About Us</a>
+        <a href="#">Careers</a>
+        <a href="#">Sell on Bauba</a>
+        <a href="#">Press &amp; News</a>
+        <a href="#">Competitions</a>
+      </div>
+      <div class="footer-col">
+        <h4>Terms and Policies</h4>
+        <a href="#">Platform Terms</a>
+        <a href="#">Returns Policy</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Responsible Disclosure</a>
+        <a href="#">Human Rights Statement</a>
+      </div>
+    </div>
+
+    <div class="footer-lower">
+      <div class="fapp">
+        <h4>Download Our Apps</h4>
+        <div class="app-badges">
+          <a class="app-badge" href="#">
+            <i class="fab fa-apple"></i>
+            <div class="app-txt"><span class="app-sub">Download on the</span><span class="app-name">App Store</span></div>
+          </a>
+          <a class="app-badge" href="#">
+            <i class="fab fa-google-play"></i>
+            <div class="app-txt"><span class="app-sub">GET IT ON</span><span class="app-name">Google Play</span></div>
+          </a>
+          <a class="app-badge hw" href="#">
+            <span style="font-size:18px;font-weight:800">✦</span>
+            <div class="app-txt"><span class="app-sub">EXPLORE IT ON</span><span class="app-name">AppGallery</span></div>
+          </a>
+        </div>
+      </div>
+      <div class="fsoc">
+        <h4>Follow Us</h4>
+        <div class="soc-icons">
+          <a class="soc-ico fb" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a class="soc-ico tw" href="#" aria-label="Twitter/X"><i class="fab fa-x-twitter"></i></a>
+          <a class="soc-ico ig" href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-cats">
+      <% if (typeof departments !== 'undefined' && departments && departments.length > 0) { %>
+        <% departments.forEach((dept, i) => { %>
+          <a href="/products?department=<%= dept.id %>"><%= dept.name %></a><% if (i < departments.length - 1) { %><span class="sep">/</span><% } %>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <div class="footer-pay">
+      <div class="pay-chip"><i class="fab fa-cc-visa" style="color:#1a1f71;font-size:16px"></i> VISA</div>
+      <div class="pay-chip dark"><i class="fab fa-cc-mastercard" style="font-size:16px"></i> Mastercard</div>
+      <div class="pay-chip"><i class="fab fa-cc-amex" style="color:#007bc3;font-size:16px"></i> American Express</div>
+      <div class="pay-chip">Instant EFT</div>
+      <div class="pay-chip">SnapScan</div>
+      <div class="pay-chip">Payflex</div>
+      <div class="pay-chip">PayJustNow</div>
+    </div>
+  </footer>
+
+  <!-- Back to top -->
+  <button class="back-top" id="backTop" aria-label="Back to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <script src="/js/main.js"></script>
+  <script>
+  /* ═══════════════════════════════════════════
+     HOMEPAGE INTERACTIONS & HYDRATION
+     ═══════════════════════════════════════════ */
+  (function() {
+
+    /* ── Intersection Observer: fade-up ── */
+    const fadeEls = document.querySelectorAll('.fade-up');
+    if (fadeEls.length) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      fadeEls.forEach(el => io.observe(el));
+      const heroFade = document.querySelector('.hero .fade-up');
+      if (heroFade) setTimeout(() => heroFade.classList.add('visible'), 80);
+    }
+
+    /* ── Dept Dropdown ── */
+    const deptToggle = document.getElementById('deptToggle');
+    const deptDd = document.getElementById('deptDd');
+    if (deptToggle && deptDd) {
+      deptToggle.addEventListener('click', e => { e.stopPropagation(); deptDd.classList.toggle('open'); });
+      document.addEventListener('click', () => deptDd.classList.remove('open'));
+      deptDd.addEventListener('click', e => e.stopPropagation());
+    }
+
+    /* ── Mobile Drawer ── */
+    const mobMenuBtn = document.getElementById('mobMenuBtn');
+    const mobDrawer = document.getElementById('mobDrawer');
+    const mobOverlay = document.getElementById('mobOverlay');
+    const mobCloseBtn = document.getElementById('mobCloseBtn');
+    function openDrawer() { mobDrawer.classList.add('open'); mobOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    function closeDrawer() { mobDrawer.classList.remove('open'); mobOverlay.classList.remove('open'); document.body.style.overflow = ''; }
+    mobMenuBtn && mobMenuBtn.addEventListener('click', openDrawer);
+    mobCloseBtn && mobCloseBtn.addEventListener('click', closeDrawer);
+    mobOverlay && mobOverlay.addEventListener('click', closeDrawer);
+
+    /* ── Product Carousels (arrow scroll) ── */
+    document.querySelectorAll('.pcarousel-wrap').forEach(wrap => {
+      const carousel = wrap.querySelector('.pcarousel');
+      const lft = wrap.querySelector('.cnav.lft');
+      const rgt = wrap.querySelector('.cnav.rgt');
+      if (!carousel) return;
+      const amt = 390;
+      lft && lft.addEventListener('click', () => carousel.scrollBy({ left: -amt, behavior: 'smooth' }));
+      rgt && rgt.addEventListener('click', () => carousel.scrollBy({ left:  amt, behavior: 'smooth' }));
+      const updateArrows = () => {
+        if (!lft || !rgt) return;
+        lft.style.opacity = carousel.scrollLeft > 5 ? '1' : '0.3';
+        rgt.style.opacity = carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth - 5 ? '1' : '0.3';
+      };
+      carousel.addEventListener('scroll', updateArrows);
+      updateArrows();
+    });
+
+    /* ── Brand Row Arrows ── */
+    const brandsList = document.getElementById('brandsList');
+    const brandArrL = document.getElementById('brandArrL');
+    const brandArrR = document.getElementById('brandArrR');
+    if (brandsList && brandArrL && brandArrR) {
+      brandArrL.addEventListener('click', () => brandsList.scrollBy({ left: -300, behavior: 'smooth' }));
+      brandArrR.addEventListener('click', () => brandsList.scrollBy({ left:  300, behavior: 'smooth' }));
+    }
+
+    /* ── Hero Dots ── */
+    const dots = document.querySelectorAll('.hero-dot');
+    let heroIdx = 0;
+    function setDot(i) {
+      dots.forEach(d => d.classList.remove('on'));
+      if (dots[i]) dots[i].classList.add('on');
+      heroIdx = i;
+    }
+    if (dots.length) {
+      dots.forEach((d, i) => d.addEventListener('click', () => setDot(i)));
+      setInterval(() => setDot((heroIdx + 1) % dots.length), 4000);
+    }
+
+    /* ── Back to Top ── */
+    const backTop = document.getElementById('backTop');
+    if (backTop) {
+      window.addEventListener('scroll', () => backTop.classList.toggle('show', window.scrollY > 350));
+      backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+
+    /* ── Client-Side Hydration: Personalization ── */
+    async function loadPersonalization() {
+      // Only do this on the home page or if sections exist
+      const catSection = document.getElementById('recent-category-section');
+      const rvSection = document.getElementById('recently-viewed-section');
+      if (!catSection && !rvSection) return;
+
+      try {
+        const response = await fetch('/api/personalization/recently-viewed');
+        if (!response.ok) return;
+        const data = await response.json();
+
+        // 1. Continue Browsing Category
+        if (data.recentCategory && catSection) {
+          const catContainer = document.getElementById('recent-category-container');
+          catContainer.innerHTML = `
+            <a href="/products?category=${data.recentCategory.id}" class="recent-cat-banner" id="recent-category-banner">
+              <div class="recent-cat-banner__icon" aria-hidden="true">🗂️</div>
+              <div>
+                <div class="recent-cat-banner__label">Where you left off</div>
+                <div class="recent-cat-banner__name">${data.recentCategory.name}</div>
+              </div>
+              <div class="recent-cat-banner__cta">Browse Category →</div>
+            </a>
+          `;
+          catSection.style.display = 'block';
+          catSection.classList.add('visible');
+        }
+
+        // 2. Recently Viewed Products
+        if (data.products && data.products.length > 0 && rvSection) {
+          const rvGrid = document.getElementById('recently-viewed-grid');
+
+          const rvHtml = data.products.map(product => `
+            <a href="/products/${product.slug || product.id}" class="pcard" role="listitem" aria-label="${product.name}">
+              <div class="pcard-img-wrap">
+                ${product.image_url
+                  ? `<img src="${product.image_url}" alt="${product.name}" class="pcard-img" loading="lazy">`
+                  : `<div class="pcard-img-placeholder" aria-hidden="true">🛍️</div>`
+                }
+              </div>
+              <div class="pcard-body">
+                ${product.brand_name ? `<div class="pcard-brand">${product.brand_name}</div>` : ''}
+                <div class="pcard-name">${product.name}</div>
+                <div class="price-row">
+                  ${product.discount_price
+                    ? `<span class="p-main">R${Number(product.discount_price).toLocaleString()}</span>
+                       <span class="p-was">R${Number(product.price).toLocaleString()}</span>`
+                    : `<span class="p-main">R${Number(product.price).toLocaleString()}</span>`
+                  }
+                </div>
+              </div>
+            </a>
+          `).join('');
+
+          rvGrid.innerHTML = rvHtml;
+          rvSection.style.display = 'block';
+          rvSection.classList.add('visible');
+
+          // Re-bind carousel arrows for the newly injected carousel
+          const wrap = rvSection.querySelector('.pcarousel-wrap');
+          if (wrap) {
+            const carousel = wrap.querySelector('.pcarousel');
+            const lft = wrap.querySelector('.cnav.lft');
+            const rgt = wrap.querySelector('.cnav.rgt');
+            const amt = 390;
+            lft && lft.addEventListener('click', () => carousel.scrollBy({ left: -amt, behavior: 'smooth' }));
+            rgt && rgt.addEventListener('click', () => carousel.scrollBy({ left:  amt, behavior: 'smooth' }));
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load personalization data', err);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadPersonalization);
+
+    /* ── Clear Recently Viewed ── */
+    const clearRecentBtn = document.getElementById('clearRecentBtn');
+    if (clearRecentBtn) {
+      clearRecentBtn.addEventListener('click', async () => {
+        try {
+          await fetch('/api/personalization/clear-recently-viewed', { method: 'POST' });
+          const rvSection = document.getElementById('recently-viewed-section');
+          if (rvSection) rvSection.style.display = 'none';
+        } catch (e) { console.error(e); }
+      });
+    }
+
+  })();
+  </script>
+</body>
+</html>

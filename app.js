@@ -78,6 +78,13 @@ app.use(async (req, res, next) => {
         res.locals.wishlistCount = 0;
     }
 
+    try {
+        const departmentsJson = await redisClient.get(CACHE_KEYS.DEPARTMENTS);
+        res.locals.departments = departmentsJson ? JSON.parse(departmentsJson) : [];
+    } catch (err) {
+        res.locals.departments = [];
+    }
+
     next();
 });
 
@@ -103,7 +110,6 @@ app.get('/', async (req, res) => {
     try {
         const brandsJson = await redisClient.get(CACHE_KEYS.BRANDS);
         const discountedJson = await redisClient.get(CACHE_KEYS.DISCOUNTED);
-        const departmentsJson = await redisClient.get(CACHE_KEYS.DEPARTMENTS);
         const trendingJson = await redisClient.get(CACHE_KEYS.TRENDING);
         const newArrivalsJson = await redisClient.get(CACHE_KEYS.NEW_ARRIVALS);
 
@@ -111,7 +117,6 @@ app.get('/', async (req, res) => {
             title: 'Welcome',
             brands: brandsJson ? JSON.parse(brandsJson) : [],
             discounted: discountedJson ? JSON.parse(discountedJson) : [],
-            departments: departmentsJson ? JSON.parse(departmentsJson) : [],
             trending: trendingJson ? JSON.parse(trendingJson) : [],
             newArrivals: newArrivalsJson ? JSON.parse(newArrivalsJson) : []
             // recentlyViewed and recentCategory are completely removed from here

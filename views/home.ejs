@@ -1,677 +1,269 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bauba — Shop Smarter, Live Better</title>
-  <meta name="description" content="Discover thousands of products across electronics, fashion, home & more. Shop discounts, trending deals, and new arrivals every day at Bauba.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/home.css">
-</head>
-<body class="home-page">
+<%- include('partials/bauba-header', { title: title, bodyClass: 'home-page' }) %>
 
-  <!-- ══════════════════════════════════════
-       UTILITY BAR
-  ══════════════════════════════════════ -->
-  <div class="util-bar">
-    <div class="util-left">
-      <a href="#">Help Centre</a>
-      <a href="#">Sell on Bauba</a>
-    </div>
-    <div class="util-right">
-      <% if (user) { %>
-        <span>Hi <%= user.name || user.email || 'There' %></span>
-        <a href="/logout">Logout</a>
-        <a href="/orders">Orders</a>
-        <a href="/account">My Account</a>
-      <% } else { %>
-        <a href="/login">Login</a>
-        <a href="/register">Register</a>
-      <% } %>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       HEADER
-  ══════════════════════════════════════ -->
-  <header class="site-header">
-    <button class="mob-menu-btn" id="mobMenuBtn" aria-label="Menu">
-      <i class="fas fa-bars"></i>
-    </button>
-    <a href="/" class="logo">
-      <span class="logo-word">bauba</span>
-      <span class="logo-dot">.com</span>
-    </a>
-    <div class="search-wrap">
-      <input type="text" placeholder="Search for products, brands...">
-      <button class="search-btn" aria-label="Search"><i class="fas fa-magnifying-glass"></i></button>
-    </div>
-    <div class="header-actions">
-      <a href="/wishlist" class="wishlist-btn" aria-label="Wishlist">
-        <i class="fas fa-heart"></i>
-        <% if (wishlistCount > 0) { %><span class="wishlist-badge"><%= wishlistCount %></span><% } %>
-      </a>
-      <a href="/cart" class="cart-btn" aria-label="Cart">
-        <i class="fas fa-cart-shopping" style="font-size:14px"></i>
-        <% if (cartCount > 0) { %><span class="cart-badge"><%= cartCount %></span><% } %>
-      </a>
-    </div>
-  </header>
-
-  <!-- ══════════════════════════════════════
-       DESKTOP NAVBAR
-  ══════════════════════════════════════ -->
-  <nav class="navbar">
-    <button class="dept-btn" id="deptToggle">
-      <i class="fas fa-bars"></i>
-      Shop by Department
-      <i class="fas fa-chevron-down chev"></i>
-    </button>
-    <div class="nav-links">
-      <a href="/products?tag=alot-for-less" class="nav-link">ALOT For Less</a>
-      <a href="/products?tag=sale" class="nav-link">Thanksalot Sale</a>
-      <a href="/products?tag=winter" class="nav-link">Winter</a>
-      <a href="/products?sort=newest" class="nav-link">New Arrivals</a>
-      <a href="/products?tag=more" class="nav-link more">BaubaMORE</a>
-      <a href="/products" class="nav-link">Brands Store</a>
-      <a href="/products?tag=deals" class="nav-link">Deals &amp; Promotions</a>
-      <a href="/products?tag=clearance" class="nav-link">Clearance</a>
+<!-- ─── HERO BANNER ─── -->
+<div class="hero" id="hero">
+  <div class="hero-slide">
+    <div class="hero-left">
+      <div class="hero-sale-row">
+        <span class="hero-tks">bauba</span>
+        <span class="hero-sale-pill">sale</span>
+      </div>
+      <div class="hero-tagline">Shop smarter, live better.</div>
+      <div class="hero-savebox">
+        <div class="lbl">save up to</div>
+        <div class="pct">60%</div>
+      </div>
+      <div class="hero-date">Daily deals on electronics, home &amp; more</div>
     </div>
 
-    <!-- Dept Dropdown -->
-    <div class="dept-dd" id="deptDd">
-      <% if (departments && departments.length > 0) { %>
-        <% departments.forEach(dept => { %>
-          <a href="/products?department=<%= dept.id %>"><%= dept.name %> <i class="fas fa-chevron-right"></i></a>
-        <% }) %>
-      <% } %>
-      <div class="more-deals-bar"><span>bauba</span>more deals</div>
+    <div class="hero-prods">
+      <div class="h-prod" style="width:65px;height:85px;font-size:30px">🔧</div>
+      <div class="h-prod" style="width:80px;height:100px;font-size:38px">🧹</div>
+      <div class="h-prod" style="width:65px;height:75px;font-size:28px">🫧</div>
     </div>
-  </nav>
 
-  <!-- ══════════════════════════════════════
-       MOBILE SLIM NAVBAR
-  ══════════════════════════════════════ -->
-  <nav class="mob-navbar">
-    <a href="/products?tag=alot-for-less">ALOT For Less</a>
-    <a href="/products?tag=sale">Thanksalot Sale</a>
-    <a href="/products?tag=winter">Winter</a>
-    <a href="/products?sort=newest">New Arrivals</a>
-    <a class="more" href="/products?tag=more">BaubaMORE</a>
-    <a href="/products">Brands Store</a>
-    <a href="/products?tag=deals">Deals &amp; Promotions</a>
-    <a href="/products?tag=clearance">Clearance</a>
-  </nav>
-
-  <!-- ══════════════════════════════════════
-       MOBILE DRAWER
-  ══════════════════════════════════════ -->
-  <div class="mob-overlay" id="mobOverlay"></div>
-  <div class="mob-drawer" id="mobDrawer">
-    <div class="mob-drawer-head">
-      Shop by Department
-      <button class="mob-close-btn" id="mobCloseBtn"><i class="fas fa-times"></i></button>
-    </div>
-    <% if (departments && departments.length > 0) { %>
-      <% departments.forEach(dept => { %>
-        <a href="/products?department=<%= dept.id %>"><%= dept.name %> <i class="fas fa-chevron-right"></i></a>
-      <% }) %>
-    <% } %>
-    <div class="more-deals-bar"><span>bauba</span>more deals</div>
-    <div class="mob-nav-links">
-      <a href="/products?tag=alot-for-less">ALOT For Less <i class="fas fa-chevron-right"></i></a>
-      <a href="/products?tag=sale">Thanksalot Sale <i class="fas fa-chevron-right"></i></a>
-      <a href="/products?tag=winter">Winter <i class="fas fa-chevron-right"></i></a>
-      <a href="/products?sort=newest">New Arrivals <i class="fas fa-chevron-right"></i></a>
-      <a href="/products?tag=more" style="color:var(--red)">BaubaMORE <i class="fas fa-chevron-right"></i></a>
-    </div>
-  </div>
-
-  <!-- ══════════════════════════════════════
-       PAGE CONTENT
-  ══════════════════════════════════════ -->
-  <main class="page">
-
-    <!-- ─── HERO BANNER ─── -->
-    <div class="hero" id="hero">
-      <div class="hero-slide">
-        <div class="hero-left">
-          <div class="hero-sale-row">
-            <span class="hero-tks">bauba</span>
-            <span class="hero-sale-pill">sale</span>
-          </div>
-          <div class="hero-tagline">Shop smarter, live better.</div>
-          <div class="hero-savebox">
-            <div class="lbl">save up to</div>
-            <div class="pct">60%</div>
-          </div>
-          <div class="hero-date">Daily deals on electronics, home &amp; more</div>
-        </div>
-
-        <div class="hero-prods">
-          <div class="h-prod" style="width:65px;height:85px;font-size:30px">🔧</div>
-          <div class="h-prod" style="width:80px;height:100px;font-size:38px">🧹</div>
-          <div class="h-prod" style="width:65px;height:75px;font-size:28px">🫧</div>
-        </div>
-
-        <div class="hero-right">
-          <% if (discounted && discounted.length > 0) { %>
-            <% const heroProd = discounted[0]; %>
-            <div class="tv-screen">
-              <% if (heroProd.image_url) { %>
-                <img src="<%= heroProd.image_url %>" alt="<%= heroProd.name %>" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">
-              <% } else { %>
-                <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px">🏷️</div>
-              <% } %>
-            </div>
-            <div class="sky-info">
-              <div class="sky-brand" style="font-size:13px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= heroProd.brand_name || 'Featured Deal' %></div>
-              <div class="sky-sub" style="font-size:15px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= heroProd.name %></div>
-              <div class="tv-specs">
-                <span style="color:#fff;font-weight:700">R<%= Number(heroProd.discount_price || heroProd.price).toLocaleString() %></span>
-                <% if (heroProd.discount_price && heroProd.price > heroProd.discount_price) { %>
-                  <span style="color:rgba(255,255,255,.35)">·</span>
-                  <span style="text-decoration:line-through;opacity:.7">R<%= Number(heroProd.price).toLocaleString() %></span>
-                <% } %>
-              </div>
-            </div>
-          <% } else { %>
-            <div class="tv-screen"><div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px">📦</div></div>
-            <div class="sky-info">
-              <div class="sky-brand">BAUBA</div>
-              <div class="sky-sub">Deals<sup>+</sup></div>
-              <div class="tv-specs"><span>Fast</span><span style="color:rgba(255,255,255,.35)">·</span><span>Safe</span><span style="color:rgba(255,255,255,.35)">·</span><span>Easy</span></div>
-            </div>
+    <div class="hero-right">
+      <% if (discounted && discounted.length > 0) { %>
+      <% const heroProd = discounted[0]; %>
+      <div class="tv-screen">
+        <% if (heroProd.image_url) { %>
+        <img src="<%= heroProd.image_url %>" alt="<%= heroProd.name %>" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">
+        <% } else { %>
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px">🏷️</div>
+        <% } %>
+      </div>
+      <div class="sky-info">
+        <div class="sky-brand" style="font-size:13px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= heroProd.brand_name || 'Featured Deal' %></div>
+        <div class="sky-sub" style="font-size:15px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= heroProd.name %></div>
+        <div class="tv-specs">
+          <span style="color:#fff;font-weight:700">R<%= Number(heroProd.discount_price || heroProd.price).toLocaleString() %></span>
+          <% if (heroProd.discount_price && heroProd.price > heroProd.discount_price) { %>
+          <span style="color:rgba(255,255,255,.35)">·</span>
+          <span style="text-decoration:line-through;opacity:.7">R<%= Number(heroProd.price).toLocaleString() %></span>
           <% } %>
         </div>
       </div>
-      <div class="hero-dots">
-        <div class="hero-dot on"></div>
-        <div class="hero-dot"></div>
-        <div class="hero-dot"></div>
-        <div class="hero-dot"></div>
+      <% } else { %>
+      <div class="tv-screen">
+        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:40px">📦</div>
       </div>
-    </div>
-
-    <!-- ─── FEATURED BRANDS ─── -->
-    <% if (brands && brands.length > 0) { %>
-    <div class="sec-head"><span class="sec-title" style="font-size:17px">Featured Brands</span></div>
-    <div class="brands-row">
-      <button class="brand-arr" id="brandArrL" aria-label="Previous brands"><i class="fas fa-chevron-left"></i></button>
-      <div class="brands-list" id="brandsList">
-        <% brands.forEach(brand => { %>
-          <a href="/products?brand=<%= brand.id %>" class="brand-cell" aria-label="Browse <%= brand.name %>">
-            <% if (brand.logo_url) { %>
-              <img src="<%= brand.logo_url %>" alt="<%= brand.name %>" class="brand-logo-img" loading="lazy">
-            <% } else { %>
-              <span class="brand-logo"><%= brand.name %></span>
-            <% } %>
-          </a>
-        <% }) %>
+      <div class="sky-info">
+        <div class="sky-brand">BAUBA</div>
+        <div class="sky-sub">Deals<sup>+</sup></div>
+        <div class="tv-specs"><span>Fast</span><span style="color:rgba(255,255,255,.35)">·</span><span>Safe</span><span style="color:rgba(255,255,255,.35)">·</span><span>Easy</span></div>
       </div>
-      <button class="brand-arr" id="brandArrR" aria-label="Next brands"><i class="fas fa-chevron-right"></i></button>
-    </div>
-    <% } %>
-
-    <!-- ─── CONTINUE BROWSING (client hydrated) ─── -->
-    <section class="home-section fade-up" id="recent-category-section" aria-label="Continue Browsing" style="display:none;">
-      <div class="sec-head">
-        <span class="sec-title">Continue Browsing</span>
-      </div>
-      <div id="recent-category-container"></div>
-    </section>
-
-    <!-- ─── RECENTLY VIEWED (client hydrated) ─── -->
-    <section class="home-section fade-up" id="recently-viewed-section" aria-label="Recently Viewed" style="display:none;">
-      <div class="sec-head">
-        <span class="sec-title">Pick Up Where You Left Off</span>
-        <div class="sec-actions">
-          <button class="ghost-btn" onclick="window.location.href='/products'">View More</button>
-          <button class="ghost-btn" id="clearRecentBtn">Clear All</button>
-        </div>
-      </div>
-      <div class="pcarousel-wrap">
-        <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-        <div class="pcarousel" id="recently-viewed-grid"></div>
-        <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
-      </div>
-    </section>
-
-    <!-- ─── SHOP DISCOUNTED ─── -->
-    <% if (discounted && discounted.length > 0) { %>
-    <section class="home-section fade-up" id="deals" aria-label="Shop Discounts">
-      <div class="sec-head">
-        <span class="sec-title">🔥 Shop Discounted</span>
-        <a href="/products" class="ghost-btn">See all deals →</a>
-      </div>
-      <div class="pcarousel-wrap">
-        <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-        <div class="pcarousel" role="list">
-          <% discounted.forEach((product, i) => { %>
-            <a href="/products/<%= product.slug || product.id %>" class="pcard fade-up" role="listitem" id="deal-product-<%= product.id %>" aria-label="<%= product.name %> — <%= product.discount_pct || 0 %>% off" style="transition-delay: <%= i * 60 %>ms">
-              <div class="pcard-img-wrap">
-                <% if (product.discount_pct) { %>
-                  <div class="sbadge"><div class="b-pct"><%= product.discount_pct %>%<small>OFF</small></div></div>
-                <% } %>
-                <% if (product.image_url) { %>
-                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="pcard-img" loading="lazy">
-                <% } else { %>
-                  <div class="pcard-img-placeholder" aria-hidden="true">🏷️</div>
-                <% } %>
-              </div>
-              <div class="pcard-body">
-                <% if (product.brand_name) { %><div class="pcard-brand"><%= product.brand_name %></div><% } %>
-                <div class="pcard-name"><%= product.name %></div>
-                <div class="price-row">
-                  <span class="p-main">R<%= Number(product.discount_price || product.price).toLocaleString() %></span>
-                  <% if (product.discount_price && product.price > product.discount_price) { %>
-                    <span class="p-was">R<%= Number(product.price).toLocaleString() %></span>
-                  <% } %>
-                </div>
-              </div>
-            </a>
-          <% }) %>
-        </div>
-        <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
-      </div>
-    </section>
-    <% } %>
-
-    <!-- ─── PROMO BANNER ─── -->
-    <div class="absa-banner fade-up">
-      <div class="absa-left">
-        <div class="absa-title1">bauba <span class="absa-sale-pill">rewards</span></div>
-        <div class="absa-title2">(<span class="absa-red">members</span>)</div>
-        <div class="absa-body">Shop daily deals and</div>
-        <div class="absa-pct-box">
-          <div class="absa-pct">get up to 30%</div>
-          <div class="absa-small">*Real cash back on selected items</div>
-          <div class="absa-small">New deals every week</div>
-          <div class="absa-tcs">*Depending on promotions. T&amp;Cs apply.</div>
-        </div>
-      </div>
-      <div class="absa-circle">(bauba)</div>
-    </div>
-
-    <!-- ─── NEW ARRIVALS ─── -->
-    <% if (newArrivals && newArrivals.length > 0) { %>
-    <section class="home-section fade-up" id="new-arrivals" aria-label="New Arrivals">
-      <div class="sec-head">
-        <span class="sec-title">✨ New Arrivals</span>
-        <a href="/products?sort=newest" class="ghost-btn">See all →</a>
-      </div>
-      <div class="pcarousel-wrap">
-        <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-        <div class="pcarousel" role="list">
-          <% newArrivals.forEach((product, i) => { %>
-            <a href="/products/<%= product.slug || product.id %>" class="pcard fade-up" role="listitem" id="new-product-<%= product.id %>" aria-label="<%= product.name %>" style="transition-delay: <%= i * 50 %>ms">
-              <div class="pcard-img-wrap">
-                <span class="pcard__badge pcard__badge--new">New</span>
-                <% if (product.image_url) { %>
-                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="pcard-img" loading="lazy">
-                <% } else { %>
-                  <div class="pcard-img-placeholder" aria-hidden="true">📦</div>
-                <% } %>
-              </div>
-              <div class="pcard-body">
-                <% if (product.brand_name) { %><div class="pcard-brand"><%= product.brand_name %></div><% } %>
-                <div class="pcard-name"><%= product.name %></div>
-                <div class="price-row">
-                  <% if (product.discount_price) { %>
-                    <span class="p-main">R<%= Number(product.discount_price).toLocaleString() %></span>
-                    <span class="p-was">R<%= Number(product.price).toLocaleString() %></span>
-                  <% } else { %>
-                    <span class="p-main">R<%= Number(product.price).toLocaleString() %></span>
-                  <% } %>
-                </div>
-              </div>
-            </a>
-          <% }) %>
-        </div>
-        <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
-      </div>
-    </section>
-    <% } %>
-
-    <!-- ─── CATEGORY SALE BANNERS (Departments) ─── -->
-    <% if (departments && departments.length > 0) { %>
-    <section class="home-section fade-up" id="departments" aria-label="Shop by Department">
-      <div class="catgrid" role="list">
-        <% const catColors = ['#7b1fa2','#2e7d32','#6d4c1e','#c2185b','#1565c0','#e64a19','#5e35b1','#00838f']; %>
-        <% const catEmojis = ['🍾','🏡','🛍️','👠','📱','🏠','💄','⚽']; %>
-        <% departments.slice(0, 4).forEach((dept, i) => { %>
-          <a href="/products?department=<%= dept.id %>" class="catbanner fade-up" role="listitem" id="dept-card-<%= dept.id %>" aria-label="Browse <%= dept.name %>" style="transition-delay: <%= i * 50 %>ms">
-            <div class="cat-inner">
-              <div class="cat-tag-row"><span class="cat-tks">bauba</span><span class="cat-sale-pill">sale</span><span class="cat-save-txt">save up to</span></div>
-              <div class="cat-pct"><%= [55,50,40,50][i] || 40 %>%</div>
-              <div class="cat-name-pill" style="background:<%= catColors[i % catColors.length] %>"><%= dept.name %></div>
-              <div class="cat-ghost"><%= catEmojis[i % catEmojis.length] %></div>
-            </div>
-          </a>
-        <% }) %>
-      </div>
-    </section>
-    <% } %>
-
-    <!-- ─── TRENDING DEALS ─── -->
-    <% if (trending && trending.length > 0) { %>
-    <section class="home-section fade-up" id="trending" aria-label="Trending Deals">
-      <div class="sec-head">
-        <span class="sec-title">⚡ Trending Deals</span>
-        <a href="/products?sort=newest" class="ghost-btn">See all →</a>
-      </div>
-      <div class="pcarousel-wrap">
-        <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
-        <div class="pcarousel" role="list">
-          <% trending.forEach((product, i) => { %>
-            <a href="/products/<%= product.slug || product.id %>" class="pcard fade-up" role="listitem" id="trending-product-<%= product.id %>" aria-label="<%= product.name %>" style="transition-delay: <%= i * 50 %>ms">
-              <div class="pcard-img-wrap">
-                <span class="pcard__badge pcard__badge--trending">Trending</span>
-                <% if (product.image_url) { %>
-                  <img src="<%= product.image_url %>" alt="<%= product.name %>" class="pcard-img" loading="lazy">
-                <% } else { %>
-                  <div class="pcard-img-placeholder" aria-hidden="true">⚡</div>
-                <% } %>
-              </div>
-              <div class="pcard-body">
-                <% if (product.brand_name) { %><div class="pcard-brand"><%= product.brand_name %></div><% } %>
-                <div class="pcard-name"><%= product.name %></div>
-                <div class="price-row">
-                  <% if (product.discount_price) { %>
-                    <span class="p-main">R<%= Number(product.discount_price).toLocaleString() %></span>
-                    <span class="p-was">R<%= Number(product.price).toLocaleString() %></span>
-                  <% } else { %>
-                    <span class="p-main">R<%= Number(product.price).toLocaleString() %></span>
-                  <% } %>
-                </div>
-              </div>
-            </a>
-          <% }) %>
-        </div>
-        <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
-      </div>
-    </section>
-    <% } %>
-
-  </main>
-
-  <!-- ══════════════════════════════════════
-       FOOTER
-  ══════════════════════════════════════ -->
-  <footer>
-    <div class="footer-main">
-      <div class="footer-col">
-        <h4>Shop</h4>
-        <a href="/products?tag=deals">Deals</a>
-        <a href="/products?tag=alot-for-less">ALOT For Less</a>
-        <a href="/products?tag=clearance">Clearance Sale</a>
-        <a href="#">Gift Vouchers</a>
-        <a href="/products?tag=more">BaubaMORE Deals</a>
-      </div>
-      <div class="footer-col">
-        <h4>Account</h4>
-        <a href="/account">My Account</a>
-        <a href="/orders">Track Order</a>
-        <a href="#">Returns</a>
-        <a href="#">Invoices</a>
-        <a href="#">Coupons</a>
-      </div>
-      <div class="footer-col">
-        <h4>Help</h4>
-        <a href="#">Help Centre</a>
-        <a href="#">Contact Us</a>
-        <a href="#">Returns</a>
-        <a href="#">Shipping &amp; Delivery</a>
-        <a href="#">Pickup Points</a>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <a href="#">About Us</a>
-        <a href="#">Careers</a>
-        <a href="#">Sell on Bauba</a>
-        <a href="#">Press &amp; News</a>
-        <a href="#">Competitions</a>
-      </div>
-      <div class="footer-col">
-        <h4>Terms and Policies</h4>
-        <a href="#">Platform Terms</a>
-        <a href="#">Returns Policy</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Responsible Disclosure</a>
-        <a href="#">Human Rights Statement</a>
-      </div>
-    </div>
-
-    <div class="footer-lower">
-      <div class="fapp">
-        <h4>Download Our Apps</h4>
-        <div class="app-badges">
-          <a class="app-badge" href="#">
-            <i class="fab fa-apple"></i>
-            <div class="app-txt"><span class="app-sub">Download on the</span><span class="app-name">App Store</span></div>
-          </a>
-          <a class="app-badge" href="#">
-            <i class="fab fa-google-play"></i>
-            <div class="app-txt"><span class="app-sub">GET IT ON</span><span class="app-name">Google Play</span></div>
-          </a>
-          <a class="app-badge hw" href="#">
-            <span style="font-size:18px;font-weight:800">✦</span>
-            <div class="app-txt"><span class="app-sub">EXPLORE IT ON</span><span class="app-name">AppGallery</span></div>
-          </a>
-        </div>
-      </div>
-      <div class="fsoc">
-        <h4>Follow Us</h4>
-        <div class="soc-icons">
-          <a class="soc-ico fb" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-          <a class="soc-ico tw" href="#" aria-label="Twitter/X"><i class="fab fa-x-twitter"></i></a>
-          <a class="soc-ico ig" href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        </div>
-      </div>
-    </div>
-
-    <div class="footer-cats">
-      <% if (departments && departments.length > 0) { %>
-        <% departments.forEach((dept, i) => { %>
-          <a href="/products?department=<%= dept.id %>"><%= dept.name %></a><% if (i < departments.length - 1) { %><span class="sep">/</span><% } %>
-        <% }) %>
       <% } %>
     </div>
+  </div>
+  <div class="hero-dots">
+    <div class="hero-dot on"></div>
+    <div class="hero-dot"></div>
+    <div class="hero-dot"></div>
+    <div class="hero-dot"></div>
+  </div>
+</div>
 
-    <div class="footer-pay">
-      <div class="pay-chip"><i class="fab fa-cc-visa" style="color:#1a1f71;font-size:16px"></i> VISA</div>
-      <div class="pay-chip dark"><i class="fab fa-cc-mastercard" style="font-size:16px"></i> Mastercard</div>
-      <div class="pay-chip"><i class="fab fa-cc-amex" style="color:#007bc3;font-size:16px"></i> American Express</div>
-      <div class="pay-chip">Instant EFT</div>
-      <div class="pay-chip">SnapScan</div>
-      <div class="pay-chip">Payflex</div>
-      <div class="pay-chip">PayJustNow</div>
+<!-- ─── FEATURED BRANDS ─── -->
+<% if (brands && brands.length > 0) { %>
+<div class="sec-head"><span class="sec-title" style="font-size:17px">Featured Brands</span></div>
+<div class="brands-row">
+  <button class="brand-arr" id="brandArrL" aria-label="Previous brands"><i class="fas fa-chevron-left"></i></button>
+  <div class="brands-list" id="brandsList">
+    <% brands.forEach(brand => { %>
+    <a href="/products?brand=<%= brand.id %>" class="brand-cell" aria-label="Browse <%= brand.name %>">
+      <% if (brand.logo_url) { %>
+      <img src="<%= brand.logo_url %>" alt="<%= brand.name %>" class="brand-logo-img" loading="lazy">
+      <% } else { %>
+      <span class="brand-logo"><%= brand.name %></span>
+      <% } %>
+    </a>
+    <% }) %>
+  </div>
+  <button class="brand-arr" id="brandArrR" aria-label="Next brands"><i class="fas fa-chevron-right"></i></button>
+</div>
+<% } %>
+
+<!-- ─── CONTINUE BROWSING (client hydrated) ─── -->
+<section class="home-section fade-up" id="recent-category-section" aria-label="Continue Browsing" style="display:none;">
+  <div class="sec-head">
+    <span class="sec-title">Continue Browsing</span>
+  </div>
+  <div id="recent-category-container"></div>
+</section>
+
+<!-- ─── RECENTLY VIEWED (client hydrated) ─── -->
+<section class="home-section fade-up" id="recently-viewed-section" aria-label="Recently Viewed" style="display:none;">
+  <div class="sec-head">
+    <span class="sec-title">Pick Up Where You Left Off</span>
+    <div class="sec-actions">
+      <button class="ghost-btn" onclick="window.location.href='/products'">View More</button>
+      <button class="ghost-btn" id="clearRecentBtn">Clear All</button>
     </div>
-  </footer>
+  </div>
+  <div class="pcarousel-wrap">
+    <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+    <div class="pcarousel" id="recently-viewed-grid"></div>
+    <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+  </div>
+</section>
 
-  <!-- Back to top -->
-  <button class="back-top" id="backTop" aria-label="Back to top">
-    <i class="fas fa-chevron-up"></i>
-  </button>
+<!-- ─── SHOP DISCOUNTED ─── -->
+<% if (discounted && discounted.length > 0) { %>
+<section class="home-section fade-up" id="deals" aria-label="Shop Discounts">
+  <div class="sec-head">
+    <span class="sec-title">Shop Discounted</span>
+    <a href="/products?isDiscounted=true&" class="ghost-btn">See all deals →</a>
+  </div>
+  <div class="pcarousel-wrap">
+    <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+    <div class="pcarousel" role="list">
+      <% discounted.forEach((product, i) => { %>
+      <a href="/products/<%= product.slug || product.id %>" class="pcard fade-up" role="listitem" id="deal-product-<%= product.id %>" aria-label="<%= product.name %> — <%= product.discount_pct || 0 %>% off" style="transition-delay: <%= i * 60 %>ms">
+        <div class="pcard-img-wrap">
+          <% if (product.discount_pct) { %>
+          <div class="sbadge">
+            <div class="b-pct"><%= product.discount_pct %>%<small>OFF</small></div>
+          </div>
+          <% } %>
+          <% if (product.image_url) { %>
+          <img src="<%= product.image_url %>" alt="<%= product.name %>" class="pcard-img" loading="lazy">
+          <% } else { %>
+          <div class="pcard-img-placeholder" aria-hidden="true">🏷️</div>
+          <% } %>
+        </div>
+        <div class="pcard-body">
+          <% if (product.brand_name) { %><div class="pcard-brand"><%= product.brand_name %></div><% } %>
+          <div class="pcard-name"><%= product.name %></div>
+          <div class="price-row">
+            <span class="p-main">R<%= Number(product.discount_price || product.price).toLocaleString() %></span>
+            <% if (product.discount_price && product.price > product.discount_price) { %>
+            <span class="p-was">R<%= Number(product.price).toLocaleString() %></span>
+            <% } %>
+          </div>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+    <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+  </div>
+</section>
+<% } %>
 
-  <script src="/js/main.js"></script>
-  <script>
-  /* ═══════════════════════════════════════════
-     HOMEPAGE INTERACTIONS & HYDRATION
-     ═══════════════════════════════════════════ */
-  (function() {
+<!-- ─── PROMO BANNER ─── -->
+<div class="absa-banner fade-up">
+  <div class="absa-left">
+    <div class="absa-title1">bauba <span class="absa-sale-pill">rewards</span></div>
+    <div class="absa-title2">(<span class="absa-red">members</span>)</div>
+    <div class="absa-body">Shop daily deals and</div>
+    <div class="absa-pct-box">
+      <div class="absa-pct">get up to 30%</div>
+      <div class="absa-small">*Real cash back on selected items</div>
+      <div class="absa-small">New deals every week</div>
+      <div class="absa-tcs">*Depending on promotions. T&amp;Cs apply.</div>
+    </div>
+  </div>
+  <div class="absa-circle">(bauba)</div>
+</div>
 
-    /* ── Intersection Observer: fade-up ── */
-    const fadeEls = document.querySelectorAll('.fade-up');
-    if (fadeEls.length) {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add('visible');
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.08 });
-      fadeEls.forEach(el => io.observe(el));
-      const heroFade = document.querySelector('.hero .fade-up');
-      if (heroFade) setTimeout(() => heroFade.classList.add('visible'), 80);
-    }
+<!-- ─── NEW ARRIVALS ─── -->
+<% if (newArrivals && newArrivals.length > 0) { %>
+<section class="home-section fade-up" id="new-arrivals" aria-label="New Arrivals">
+  <div class="sec-head">
+    <span class="sec-title">New Arrivals</span>
+    <a href="/products?sort=newest" class="ghost-btn">See all →</a>
+  </div>
+  <div class="pcarousel-wrap">
+    <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+    <div class="pcarousel" role="list">
+      <% newArrivals.forEach((product, i) => { %>
+      <a href="/products/<%= product.slug || product.id %>" class="pcard fade-up" role="listitem" id="new-product-<%= product.id %>" aria-label="<%= product.name %>" style="transition-delay: <%= i * 50 %>ms">
+        <div class="pcard-img-wrap">
+          <span class="pcard__badge pcard__badge--new">New</span>
+          <% if (product.image_url) { %>
+          <img src="<%= product.image_url %>" alt="<%= product.name %>" class="pcard-img" loading="lazy">
+          <% } else { %>
+          <div class="pcard-img-placeholder" aria-hidden="true">📦</div>
+          <% } %>
+        </div>
+        <div class="pcard-body">
+          <% if (product.brand_name) { %><div class="pcard-brand"><%= product.brand_name %></div><% } %>
+          <div class="pcard-name"><%= product.name %></div>
+          <div class="price-row">
+            <% if (product.discount_price) { %>
+            <span class="p-main">R<%= Number(product.discount_price).toLocaleString() %></span>
+            <span class="p-was">R<%= Number(product.price).toLocaleString() %></span>
+            <% } else { %>
+            <span class="p-main">R<%= Number(product.price).toLocaleString() %></span>
+            <% } %>
+          </div>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+    <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+  </div>
+</section>
+<% } %>
 
-    /* ── Dept Dropdown ── */
-    const deptToggle = document.getElementById('deptToggle');
-    const deptDd = document.getElementById('deptDd');
-    if (deptToggle && deptDd) {
-      deptToggle.addEventListener('click', e => { e.stopPropagation(); deptDd.classList.toggle('open'); });
-      document.addEventListener('click', () => deptDd.classList.remove('open'));
-      deptDd.addEventListener('click', e => e.stopPropagation());
-    }
+<!-- ─── CATEGORY SALE BANNERS (Departments) ─── -->
+<% if (departments && departments.length > 0) { %>
+<section class="home-section fade-up" id="departments" aria-label="Shop by Department">
+  <div class="catgrid" role="list">
+    <% const catColors = ['#7b1fa2','#2e7d32','#6d4c1e','#c2185b','#1565c0','#e64a19','#5e35b1','#00838f']; %>
+    <% const catEmojis = ['🍾','🏡','🛍️','👠','📱','🏠','💄','⚽']; %>
+    <% departments.slice(0, 4).forEach((dept, i) => { %>
+    <a href="/products?department=<%= dept.id %>" class="catbanner fade-up" role="listitem" id="dept-card-<%= dept.id %>" aria-label="Browse <%= dept.name %>" style="transition-delay: <%= i * 50 %>ms">
+      <div class="cat-inner">
+        <div class="cat-tag-row"><span class="cat-tks">bauba</span><span class="cat-sale-pill">sale</span><span class="cat-save-txt">save up to</span></div>
+        <div class="cat-pct"><%= [55,50,40,50][i] || 40 %>%</div>
+        <div class="cat-name-pill" style="background:<%= catColors[i % catColors.length] %>"><%= dept.name %></div>
+        <div class="cat-ghost"><%= catEmojis[i % catEmojis.length] %></div>
+      </div>
+    </a>
+    <% }) %>
+  </div>
+</section>
+<% } %>
 
-    /* ── Mobile Drawer ── */
-    const mobMenuBtn = document.getElementById('mobMenuBtn');
-    const mobDrawer = document.getElementById('mobDrawer');
-    const mobOverlay = document.getElementById('mobOverlay');
-    const mobCloseBtn = document.getElementById('mobCloseBtn');
-    function openDrawer() { mobDrawer.classList.add('open'); mobOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-    function closeDrawer() { mobDrawer.classList.remove('open'); mobOverlay.classList.remove('open'); document.body.style.overflow = ''; }
-    mobMenuBtn && mobMenuBtn.addEventListener('click', openDrawer);
-    mobCloseBtn && mobCloseBtn.addEventListener('click', closeDrawer);
-    mobOverlay && mobOverlay.addEventListener('click', closeDrawer);
+<!-- ─── TRENDING DEALS ─── -->
+<% if (trending && trending.length > 0) { %>
+<section class="home-section fade-up" id="trending" aria-label="Trending Deals">
+  <div class="sec-head">
+    <span class="sec-title">Trending Deals</span>
+    <a href="/products?sort=newest" class="ghost-btn">See all →</a>
+  </div>
+  <div class="pcarousel-wrap">
+    <button class="cnav lft" aria-label="Previous"><i class="fas fa-chevron-left"></i></button>
+    <div class="pcarousel" role="list">
+      <% trending.forEach((product, i) => { %>
+      <a href="/products/<%= product.slug || product.id %>" class="pcard fade-up" role="listitem" id="trending-product-<%= product.id %>" aria-label="<%= product.name %>" style="transition-delay: <%= i * 50 %>ms">
+        <div class="pcard-img-wrap">
+          <span class="pcard__badge pcard__badge--trending">Trending</span>
+          <% if (product.image_url) { %>
+          <img src="<%= product.image_url %>" alt="<%= product.name %>" class="pcard-img" loading="lazy">
+          <% } else { %>
+          <div class="pcard-img-placeholder" aria-hidden="true">⚡</div>
+          <% } %>
+        </div>
+        <div class="pcard-body">
+          <% if (product.brand_name) { %><div class="pcard-brand"><%= product.brand_name %></div><% } %>
+          <div class="pcard-name"><%= product.name %></div>
+          <div class="price-row">
+            <% if (product.discount_price) { %>
+            <span class="p-main">R<%= Number(product.discount_price).toLocaleString() %></span>
+            <span class="p-was">R<%= Number(product.price).toLocaleString() %></span>
+            <% } else { %>
+            <span class="p-main">R<%= Number(product.price).toLocaleString() %></span>
+            <% } %>
+          </div>
+        </div>
+      </a>
+      <% }) %>
+    </div>
+    <button class="cnav rgt" aria-label="Next"><i class="fas fa-chevron-right"></i></button>
+  </div>
+</section>
+<% } %>
 
-    /* ── Product Carousels (arrow scroll) ── */
-    document.querySelectorAll('.pcarousel-wrap').forEach(wrap => {
-      const carousel = wrap.querySelector('.pcarousel');
-      const lft = wrap.querySelector('.cnav.lft');
-      const rgt = wrap.querySelector('.cnav.rgt');
-      if (!carousel) return;
-      const amt = 390;
-      lft && lft.addEventListener('click', () => carousel.scrollBy({ left: -amt, behavior: 'smooth' }));
-      rgt && rgt.addEventListener('click', () => carousel.scrollBy({ left:  amt, behavior: 'smooth' }));
-      const updateArrows = () => {
-        if (!lft || !rgt) return;
-        lft.style.opacity = carousel.scrollLeft > 5 ? '1' : '0.3';
-        rgt.style.opacity = carousel.scrollLeft < carousel.scrollWidth - carousel.clientWidth - 5 ? '1' : '0.3';
-      };
-      carousel.addEventListener('scroll', updateArrows);
-      updateArrows();
-    });
-
-    /* ── Brand Row Arrows ── */
-    const brandsList = document.getElementById('brandsList');
-    const brandArrL = document.getElementById('brandArrL');
-    const brandArrR = document.getElementById('brandArrR');
-    if (brandsList && brandArrL && brandArrR) {
-      brandArrL.addEventListener('click', () => brandsList.scrollBy({ left: -300, behavior: 'smooth' }));
-      brandArrR.addEventListener('click', () => brandsList.scrollBy({ left:  300, behavior: 'smooth' }));
-    }
-
-    /* ── Hero Dots ── */
-    const dots = document.querySelectorAll('.hero-dot');
-    let heroIdx = 0;
-    function setDot(i) {
-      dots.forEach(d => d.classList.remove('on'));
-      if (dots[i]) dots[i].classList.add('on');
-      heroIdx = i;
-    }
-    dots.forEach((d, i) => d.addEventListener('click', () => setDot(i)));
-    setInterval(() => setDot((heroIdx + 1) % dots.length), 4000);
-
-    /* ── Back to Top ── */
-    const backTop = document.getElementById('backTop');
-    if (backTop) {
-      window.addEventListener('scroll', () => backTop.classList.toggle('show', window.scrollY > 350));
-      backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    }
-
-    /* ── Client-Side Hydration: Personalization ── */
-    async function loadPersonalization() {
-      try {
-        const response = await fetch('/api/personalization/recently-viewed');
-        if (!response.ok) return;
-        const data = await response.json();
-
-        // 1. Continue Browsing Category
-        if (data.recentCategory) {
-          const catSection = document.getElementById('recent-category-section');
-          const catContainer = document.getElementById('recent-category-container');
-          catContainer.innerHTML = `
-            <a href="/products?category=${data.recentCategory.id}" class="recent-cat-banner" id="recent-category-banner">
-              <div class="recent-cat-banner__icon" aria-hidden="true">🗂️</div>
-              <div>
-                <div class="recent-cat-banner__label">Where you left off</div>
-                <div class="recent-cat-banner__name">${data.recentCategory.name}</div>
-              </div>
-              <div class="recent-cat-banner__cta">Browse Category →</div>
-            </a>
-          `;
-          catSection.style.display = 'block';
-          catSection.classList.add('visible');
-        }
-
-        // 2. Recently Viewed Products
-        if (data.products && data.products.length > 0) {
-          const rvSection = document.getElementById('recently-viewed-section');
-          const rvGrid = document.getElementById('recently-viewed-grid');
-
-          const rvHtml = data.products.map(product => `
-            <a href="/products/${product.slug || product.id}" class="pcard" role="listitem" aria-label="${product.name}">
-              <div class="pcard-img-wrap">
-                ${product.image_url
-                  ? `<img src="${product.image_url}" alt="${product.name}" class="pcard-img" loading="lazy">`
-                  : `<div class="pcard-img-placeholder" aria-hidden="true">🛍️</div>`
-                }
-              </div>
-              <div class="pcard-body">
-                ${product.brand_name ? `<div class="pcard-brand">${product.brand_name}</div>` : ''}
-                <div class="pcard-name">${product.name}</div>
-                <div class="price-row">
-                  ${product.discount_price
-                    ? `<span class="p-main">R${Number(product.discount_price).toLocaleString()}</span>
-                       <span class="p-was">R${Number(product.price).toLocaleString()}</span>`
-                    : `<span class="p-main">R${Number(product.price).toLocaleString()}</span>`
-                  }
-                </div>
-              </div>
-            </a>
-          `).join('');
-
-          rvGrid.innerHTML = rvHtml;
-          rvSection.style.display = 'block';
-          rvSection.classList.add('visible');
-
-          // Re-bind carousel arrows for the newly injected carousel
-          const wrap = rvSection.querySelector('.pcarousel-wrap');
-          if (wrap) {
-            const carousel = wrap.querySelector('.pcarousel');
-            const lft = wrap.querySelector('.cnav.lft');
-            const rgt = wrap.querySelector('.cnav.rgt');
-            const amt = 390;
-            lft && lft.addEventListener('click', () => carousel.scrollBy({ left: -amt, behavior: 'smooth' }));
-            rgt && rgt.addEventListener('click', () => carousel.scrollBy({ left:  amt, behavior: 'smooth' }));
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load personalization data', err);
-      }
-    }
-    document.addEventListener('DOMContentLoaded', loadPersonalization);
-
-    /* ── Clear Recently Viewed ── */
-    const clearRecentBtn = document.getElementById('clearRecentBtn');
-    if (clearRecentBtn) {
-      clearRecentBtn.addEventListener('click', async () => {
-        try {
-          await fetch('/api/personalization/clear-recently-viewed', { method: 'POST' });
-          const rvSection = document.getElementById('recently-viewed-section');
-          if (rvSection) rvSection.style.display = 'none';
-        } catch (e) { console.error(e); }
-      });
-    }
-
-  })();
-  </script>
-</body>
-</html>
+</main>
+<%- include('partials/bauba-footer') %>

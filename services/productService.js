@@ -70,6 +70,9 @@ async function _searchViaMeilisearch(filters, page, pageSize) {
     if (filters.maxPrice != null) {
         meiliFilters.push(`price <= ${Number(filters.maxPrice)}`);
     }
+    if (filters.isDiscounted) {
+        meiliFilters.push(`discount_price > 0`);
+    }
 
     const offset = (page - 1) * pageSize;
 
@@ -131,6 +134,10 @@ async function _browseViaPostgres(filters, page, pageSize) {
 
     if (filters.maxPrice != null) {
         clauses.push('COALESCE(p.discount_price, p.price) <= $' + (params.push(filters.maxPrice) && params.length));
+    }
+
+    if (filters.isDiscounted) {
+        clauses.push('p.discount_price IS NOT NULL AND p.discount_price < p.price');
     }
 
     if (filters.minRating != null) {
