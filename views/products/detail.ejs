@@ -22,9 +22,7 @@
     <div class="detail-top-row">
       <h1><%= product.name %></h1>
       <% if (user) { %>
-      <button class="btn-wishlist-heart detail-heart <%= wishlistIds.includes(product.id) ? 'active' : '' %>"
-              data-product-id="<%= product.id %>"
-              title="<%= wishlistIds.includes(product.id) ? 'Remove from wishlist' : 'Add to wishlist' %>">
+      <button class="btn-wishlist-heart detail-heart <%= wishlistIds.includes(product.id) ? 'active' : '' %>" data-product-id="<%= product.id %>" title="<%= wishlistIds.includes(product.id) ? 'Remove from wishlist' : 'Add to wishlist' %>">
         <span class="heart-icon"><%= wishlistIds.includes(product.id) ? '♥' : '♡' %></span>
       </button>
       <% } %>
@@ -36,7 +34,7 @@
       <div class="rating-stars">
         <% const avg = Number(reviewStats.average) || 0; %>
         <% for (let i = 1; i <= 5; i++) { %>
-          <span class="star <%= i <= Math.round(avg) ? 'filled' : '' %>">★</span>
+        <span class="star <%= i <= Math.round(avg) ? 'filled' : '' %>">★</span>
         <% } %>
       </div>
       <span class="rating-average"><%= avg %></span>
@@ -69,27 +67,17 @@
         <label class="variant-label"><%= group.name %>: <span class="variant-selected-value" id="selected-<%= group.slug %>"></span></label>
         <div class="variant-options">
           <% if (group.type === 'color') { %>
-            <% group.values.forEach(val => { %>
-            <button type="button"
-                    class="variant-swatch color-swatch"
-                    data-value-id="<%= val.id %>"
-                    data-attribute-id="<%= group.id %>"
-                    data-value="<%= val.value %>"
-                    style="background-color: <%= val.colorHex || '#ccc' %>"
-                    title="<%= val.value %>">
-              <span class="swatch-check">✓</span>
-            </button>
-            <% }) %>
+          <% group.values.forEach(val => { %>
+          <button type="button" class="variant-swatch color-swatch" data-value-id="<%= val.id %>" data-attribute-id="<%= group.id %>" data-value="<%= val.value %>" style="background-color: <%= val.colorHex || '#ccc' %>" title="<%= val.value %>">
+            <span class="swatch-check">✓</span>
+          </button>
+          <% }) %>
           <% } else { %>
-            <% group.values.forEach(val => { %>
-            <button type="button"
-                    class="variant-swatch text-pill"
-                    data-value-id="<%= val.id %>"
-                    data-attribute-id="<%= group.id %>"
-                    data-value="<%= val.value %>">
-              <%= val.value %>
-            </button>
-            <% }) %>
+          <% group.values.forEach(val => { %>
+          <button type="button" class="variant-swatch text-pill" data-value-id="<%= val.id %>" data-attribute-id="<%= group.id %>" data-value="<%= val.value %>">
+            <%= val.value %>
+          </button>
+          <% }) %>
           <% } %>
         </div>
       </div>
@@ -148,7 +136,7 @@
     <div class="product-tags">
       <strong>Tags:</strong>
       <% product.tags.forEach(tag => { %>
-        <a href="/products?tags=<%= tag.slug %>"><%= tag.name %></a>
+      <a href="/products?tags=<%= tag.slug %>"><%= tag.name %></a>
       <% }) %>
     </div>
     <% } %>
@@ -192,7 +180,7 @@
           <% if (rp.average_rating > 0) { %>
           <div class="rating-stars-small">
             <% for (let i = 1; i <= 5; i++) { %>
-              <span class="star <%= i <= Math.round(Number(rp.average_rating)) ? 'filled' : '' %>">★</span>
+            <span class="star <%= i <= Math.round(Number(rp.average_rating)) ? 'filled' : '' %>">★</span>
             <% } %>
             <span class="rating-count">(<%= rp.review_count || 0 %>)</span>
           </div>
@@ -236,7 +224,7 @@
       <div class="review-big-rating"><%= Number(reviewStats.average) || 0 %></div>
       <div class="rating-stars review-stars-big">
         <% for (let i = 1; i <= 5; i++) { %>
-          <span class="star <%= i <= Math.round(Number(reviewStats.average)) ? 'filled' : '' %>">★</span>
+        <span class="star <%= i <= Math.round(Number(reviewStats.average)) ? 'filled' : '' %>">★</span>
         <% } %>
       </div>
       <p class="review-total-count"><%= reviewStats.total %> review<%= reviewStats.total !== 1 ? 's' : '' %></p>
@@ -301,7 +289,7 @@
         <div class="review-card-left">
           <div class="rating-stars-small">
             <% for (let i = 1; i <= 5; i++) { %>
-              <span class="star <%= i <= review.rating ? 'filled' : '' %>">★</span>
+            <span class="star <%= i <= review.rating ? 'filled' : '' %>">★</span>
             <% } %>
           </div>
           <% if (review.title) { %>
@@ -335,15 +323,15 @@
   document.addEventListener('DOMContentLoaded', async () => {
     const productId = '<%= product.id %>';
     if (!productId) return;
-    
+
     try {
       const response = await fetch(`/api/personalization/recommendations/${productId}`);
       const data = await response.json();
-      
+
       if (data.products && data.products.length > 0) {
         const section = document.getElementById('ml-recommendations-section');
         const grid = document.getElementById('ml-recommendations-grid');
-        
+
         let html = '';
         data.products.forEach(rp => {
           html += `
@@ -368,7 +356,7 @@
             </article>
           `;
         });
-        
+
         grid.innerHTML = html;
         section.style.display = 'block';
       }

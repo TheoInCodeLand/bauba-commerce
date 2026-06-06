@@ -24,7 +24,7 @@
               <option value="">All Departments</option>
               <% if (typeof departments !== 'undefined' && departments && departments.length) { %>
                 <% departments.forEach(dept => { %>
-                  <option value="<%= dept.id %>" <%= typeof filters !== 'undefined' && (String(filters.department || filters.category) === String(dept.id)) ? 'selected' : '' %>><%= dept.name %></option>
+                  <option value="<%= dept.id %>" <%= typeof filters !== 'undefined' && String(filters.department) === String(dept.id) ? 'selected' : '' %>><%= dept.name %></option>
                 <% }) %>
               <% } else if (typeof categories !== 'undefined' && categories && categories.length) { %>
                 <% categories.forEach(cat => { %>

@@ -30,6 +30,7 @@ async function syncProductsToSearch() {
                 p.gallery,
                 p.category_id,
                 c.name  AS category_name,
+                c.department_id,
                 p.brand_id,
                 b.name  AS brand_name,
                 p.sku,
@@ -81,6 +82,7 @@ async function syncProductsToSearch() {
             gallery: p.gallery,
             category_id: p.category_id,
             category_name: p.category_name || '',
+            department_id: p.department_id,
             brand_id: p.brand_id,
             brand_name: p.brand_name || '',
             sku: p.sku,
@@ -112,6 +114,7 @@ async function syncProductsToSearch() {
             ],
             filterableAttributes: [
                 'category_id',
+                'department_id',
                 'brand_id',
                 'price',
                 'is_active',

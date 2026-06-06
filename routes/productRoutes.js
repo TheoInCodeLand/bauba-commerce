@@ -15,8 +15,8 @@ router.get('/', async (req, res) => {
     try {
         // build filters from query string
         const filters = {};
-        const cat = req.query.category || req.query.department;
-        if (cat) filters.categoryId = parseInt(cat, 10) || cat;
+        if (req.query.category) filters.categoryId = parseInt(req.query.category, 10) || req.query.category;
+        if (req.query.department) filters.departmentId = parseInt(req.query.department, 10) || req.query.department;
         if (req.query.brand) filters.brandId = parseInt(req.query.brand, 10) || req.query.brand;
         if (req.query.search) filters.search = req.query.search;
         
@@ -43,17 +43,17 @@ router.get('/', async (req, res) => {
         const { products, page, pageSize, hasMore } = result;
 
         // Track last browsed category for the home page
-        if (cat && categories.length) {
-            const categoryObj = categories.find(c => String(c.id) === String(cat) || c.slug === cat);
+        if (req.query.category && categories.length) {
+            const categoryObj = categories.find(c => String(c.id) === String(req.query.category) || c.slug === req.query.category);
             if (categoryObj) req.session.recentCategory = { id: categoryObj.id, name: categoryObj.name, slug: categoryObj.slug };
         }
 
         res.render('products/list', {
-            title: req.query.search ? `Search: ${req.query.search}` : (cat ? 'Products by Category' : 'All Products'),
+            title: req.query.search ? `Search: ${req.query.search}` : (filters.categoryId ? 'Products by Category' : (filters.departmentId ? 'Products by Department' : 'All Products')),
             products,
             categories,
             brands,
-            selectedCategory: cat || null,
+            selectedCategory: filters.categoryId || null,
             filters: req.query,
             page,
             pageSize,

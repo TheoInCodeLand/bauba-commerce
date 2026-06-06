@@ -61,6 +61,9 @@ async function _searchViaMeilisearch(filters, page, pageSize) {
     if (filters.categoryId) {
         meiliFilters.push(`category_id = ${Number(filters.categoryId)}`);
     }
+    if (filters.departmentId) {
+        meiliFilters.push(`department_id = ${Number(filters.departmentId)}`);
+    }
     if (filters.brandId) {
         meiliFilters.push(`brand_id = ${Number(filters.brandId)}`);
     }
@@ -122,6 +125,13 @@ async function _browseViaPostgres(filters, page, pageSize) {
 
     if (filters.categoryId) {
         clauses.push('p.category_id = $' + (params.push(filters.categoryId) && params.length));
+    }
+
+    if (filters.departmentId) {
+        if (!joins.includes('categories c_dept')) {
+            joins += ' LEFT JOIN categories c_dept ON p.category_id = c_dept.id';
+        }
+        clauses.push('c_dept.department_id = $' + (params.push(filters.departmentId) && params.length));
     }
 
     if (filters.brandId) {
