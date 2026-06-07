@@ -1,5 +1,6 @@
 const express = require('express');
 const productService = require('../services/productService');
+const categoryService = require('../services/categoryService');
 const redisClient = require('../config/redis');
 
 const router = express.Router();
@@ -74,6 +75,27 @@ router.get('/personalization/recommendations/:productId', async (req, res) => {
     } catch (err) {
         console.error('ML Recommendation API Error:', err);
         res.json({ products: [] });
+    }
+});
+router.get('/categories/tree', async (req, res) => {
+    try {
+        const tree = await categoryService.getCategoryTree();
+        res.json({ categories: tree });
+    } catch (err) {
+        console.error('Category Tree API Error:', err);
+        res.status(500).json({ error: 'Failed to load category tree' });
+    }
+});
+router.get('/products/:id/details', async (req, res) => {
+    try {
+        const product = await productService.getProductWithVariants(req.params.id);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        res.json(product);
+    } catch (err) {
+        console.error('Product Details API Error:', err);
+        res.status(500).json({ error: 'Failed to load product details' });
     }
 });
 

@@ -1,4 +1,43 @@
 <%- include('../partials/header') %>
+<script>
+  window.__PRODUCT_VARIANTS__ = <%- JSON.stringify(product.variants || []) %>;
+  window.__BASE_PRICE__ = <%= product.discount_price || product.price %>;
+</script>
+<style>
+  /* Specifications Table */
+  .product-specifications { margin: 2rem 0; }
+  .specs-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+  .specs-table th, .specs-table td { padding: 0.75rem; border-bottom: 1px solid #333; text-align: left; }
+  .specs-table th { color: #aaa; width: 40%; font-weight: 500; }
+  .specs-table td { color: #fff; }
+
+  /* Variant Buttons */
+  .variant-selectors { margin: 2rem 0; }
+  .variant-group { margin-bottom: 1.5rem; }
+  .variant-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #eee; }
+  .variant-options { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  
+  .variant-btn {
+    background-color: #222;
+    color: #ddd;
+    border: 2px solid #444;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+  }
+  .variant-btn:hover {
+    background-color: #333;
+    border-color: #666;
+  }
+  .variant-btn.selected {
+    background-color: #000;
+    color: #fff;
+    border-color: #007bff; /* Accented border */
+    box-shadow: 0 0 0 1px #007bff;
+  }
+</style>
 <article class="product-detail">
   <div class="product-detail-gallery">
     <div class="product-detail-image">
@@ -59,59 +98,53 @@
       <p><%= product.description || 'No description available.' %></p>
     </div>
 
-    <%/* ========== VARIANT SELECTORS ========== */%>
-    <% if (product.attributeGroups && product.attributeGroups.length > 0) { %>
-    <div class="variant-selector" id="variant-selector">
-      <% product.attributeGroups.forEach(group => { %>
-      <div class="variant-group" data-attribute-id="<%= group.id %>">
-        <label class="variant-label"><%= group.name %>: <span class="variant-selected-value" id="selected-<%= group.slug %>"></span></label>
-        <div class="variant-options">
-          <% if (group.type === 'color') { %>
-          <% group.values.forEach(val => { %>
-          <button type="button" class="variant-swatch color-swatch" data-value-id="<%= val.id %>" data-attribute-id="<%= group.id %>" data-value="<%= val.value %>" style="background-color: <%= val.colorHex || '#ccc' %>" title="<%= val.value %>">
-            <span class="swatch-check">✓</span>
-          </button>
+    <%/* ========== SPECIFICATIONS ========== */%>
+    <% if (product.specifications && Object.keys(product.specifications).length > 0) { %>
+    <div class="product-specifications">
+      <h3>Specifications</h3>
+      <table class="specs-table">
+        <tbody>
+          <% Object.entries(product.specifications).forEach(([key, val]) => { %>
+          <tr>
+            <th><%= key %></th>
+            <td><%= val %></td>
+          </tr>
           <% }) %>
-          <% } else { %>
-          <% group.values.forEach(val => { %>
-          <button type="button" class="variant-swatch text-pill" data-value-id="<%= val.id %>" data-attribute-id="<%= group.id %>" data-value="<%= val.value %>">
-            <%= val.value %>
-          </button>
-          <% }) %>
-          <% } %>
-        </div>
-      </div>
-      <% }) %>
+        </tbody>
+      </table>
     </div>
+    <% } %>
 
-    <%/* Embed variant data for JS */%>
-    <script>
-      window.__variants = <%- JSON.stringify(product.variants.map(v => ({
-        id: v.id,
-        sku: v.sku,
-        priceOverride: v.price_override,
-        stockQuantity: v.stock_quantity,
-        imageUrl: v.image_url,
-      }))) %>;
-      window.__variantAttributeMap = <%- JSON.stringify(product.variantAttributeMap) %>;
-      window.__basePrice = '<%= product.discount_price || product.price %>';
-      window.__baseStock = <%= product.stock_quantity %>;
-      window.__baseImage = '<%= product.image_url || "/images/placeholder.jpg" %>';
-    </script>
-    <% } else if (product.variants && product.variants.length) { %>
-    <%/* Fallback: simple variant list if no attribute groups */%>
-    <div class="product-variants">
-      <h3>Available Options</h3>
-      <div class="variant-pills-simple">
-        <% product.variants.forEach(variant => { %>
-        <div class="variant-pill-simple <%= variant.stock_quantity <= 0 ? 'out-of-stock' : '' %>">
-          <strong><%= variant.sku || 'Option' %></strong>
-          <span class="variant-pill-price">ZAR <%= variant.price_override || product.price %></span>
-          <span class="variant-pill-stock"><%= variant.stock_quantity > 0 ? variant.stock_quantity + ' in stock' : 'Out of stock' %></span>
+    <%/* ========== VARIANT SELECTORS ========== */%>
+    <% if (product.variants && product.variants.length > 0) { %>
+      <% 
+        const availableColors = [...new Set(product.variants.map(v => v.color).filter(Boolean))];
+        const availableSizes = [...new Set(product.variants.map(v => v.size).filter(Boolean))];
+      %>
+      
+      <div class="variant-selectors">
+        <% if (availableColors.length > 0) { %>
+        <div class="variant-group">
+          <label>Select Color:</label>
+          <div class="variant-options">
+            <% availableColors.forEach(color => { %>
+              <button type="button" class="variant-btn color-btn" data-color="<%= color %>"><%= color %></button>
+            <% }) %>
+          </div>
         </div>
-        <% }) %>
+        <% } %>
+
+        <% if (availableSizes.length > 0) { %>
+        <div class="variant-group">
+          <label>Select Size:</label>
+          <div class="variant-options">
+            <% availableSizes.forEach(size => { %>
+              <button type="button" class="variant-btn size-btn" data-size="<%= size %>"><%= size %></button>
+            <% }) %>
+          </div>
+        </div>
+        <% } %>
       </div>
-    </div>
     <% } %>
 
     <div class="product-meta">
@@ -362,6 +395,95 @@
       }
     } catch (err) {
       console.error('Failed to fetch ML recommendations:', err);
+    }
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const variants = window.__PRODUCT_VARIANTS__;
+    if (!variants || variants.length === 0) return;
+
+    let selectedColor = null;
+    let selectedSize = null;
+
+    const colorBtns = document.querySelectorAll('.color-btn');
+    const sizeBtns = document.querySelectorAll('.size-btn');
+
+    const priceDisplay = document.getElementById('display-price');
+    const stockDisplay = document.getElementById('display-stock');
+    const mainImage = document.getElementById('main-product-image');
+    const variantInput = document.getElementById('variant-id-input');
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+
+    function updateDOM() {
+      const hasColors = colorBtns.length > 0;
+      const hasSizes = sizeBtns.length > 0;
+      const colorMatches = hasColors ? selectedColor !== null : true;
+      const sizeMatches = hasSizes ? selectedSize !== null : true;
+
+      let match = null;
+      if (colorMatches && sizeMatches) {
+        match = variants.find(v => {
+          const cMatch = hasColors ? v.color === selectedColor : true;
+          const sMatch = hasSizes ? v.size === selectedSize : true;
+          return cMatch && sMatch;
+        });
+      }
+
+      if (match) {
+        const priceOverride = match.price_override || 0;
+        const price = window.__BASE_PRICE__ + Number(priceOverride);
+        priceDisplay.textContent = 'ZAR ' + price.toFixed(2);
+        
+        if (match.stock_quantity > 0) {
+          stockDisplay.textContent = match.stock_quantity <= 5 ? `Only ${match.stock_quantity} left!` : 'In Stock';
+          stockDisplay.className = 'in-stock';
+          addToCartBtn.disabled = false;
+          addToCartBtn.textContent = 'Add to Cart';
+        } else {
+          stockDisplay.textContent = 'Out of Stock';
+          stockDisplay.className = 'out-of-stock-text';
+          addToCartBtn.disabled = true;
+          addToCartBtn.textContent = 'Out of Stock';
+        }
+
+        if (match.image_url) {
+          mainImage.src = match.image_url;
+        }
+
+        variantInput.value = match.id;
+      } else {
+        variantInput.value = '';
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = 'Select Options';
+      }
+    }
+
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        colorBtns.forEach(b => b.classList.remove('selected'));
+        const target = e.currentTarget;
+        target.classList.add('selected');
+        selectedColor = target.dataset.color;
+        updateDOM();
+      });
+    });
+
+    sizeBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        sizeBtns.forEach(b => b.classList.remove('selected'));
+        const target = e.currentTarget;
+        target.classList.add('selected');
+        selectedSize = target.dataset.size;
+        updateDOM();
+      });
+    });
+
+    // Disable Add to Cart initially if variants exist and need selection
+    if (colorBtns.length > 0 || sizeBtns.length > 0) {
+        addToCartBtn.disabled = true;
+        addToCartBtn.textContent = 'Select Options';
     }
   });
 </script>

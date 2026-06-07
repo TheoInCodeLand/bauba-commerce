@@ -36,10 +36,22 @@
     <div class="form-group">
       <label for="parentId">Parent Category</label>
       <select id="parentId" name="parentId">
-        <option value="">— None —</option>
-        <% categories.forEach(parent => { %>
-        <option value="<%= parent.id %>" <%= category && category.parent_id == parent.id ? 'selected' : '' %>><%= parent.name %></option>
-        <% }) %>
+        <option value="">— None (Create Top-Level Department) —</option>
+        <% 
+        function renderCategoryOptions(nodes, prefix = '') { 
+          if (!nodes) return;
+          nodes.forEach(parent => { 
+            // Avoid selecting itself as a parent
+            if (category && category.id === parent.id) return;
+        %>
+            <option value="<%= parent.id %>" <%= category && category.parent_id == parent.id ? 'selected' : '' %>>
+              <%= prefix %><%= parent.name %>
+            </option>
+            <% if (parent.children && parent.children.length > 0) { renderCategoryOptions(parent.children, prefix + parent.name + ' > '); } %>
+          <% }); 
+        } 
+        renderCategoryOptions(categoryTree); 
+        %>
       </select>
     </div>
 

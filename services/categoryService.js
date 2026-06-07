@@ -4,17 +4,36 @@ const { slugify } = require('../utils/slugify');
 async function getCategoryTree() {
     const result = await db.query(`
         WITH RECURSIVE tree AS (
-            SELECT id, name, slug, parent_id, department_id, 0 as level
+            SELECT id, name, slug, parent_id, 0 as level
             FROM categories
             WHERE parent_id IS NULL
             UNION ALL
-            SELECT c.id, c.name, c.slug, c.parent_id, c.department_id, tree.level + 1
+            SELECT c.id, c.name, c.slug, c.parent_id, tree.level + 1
             FROM categories c
             JOIN tree ON c.parent_id = tree.id
         )
-        SELECT * FROM tree ORDER BY level, sort_order, name;
+        SELECT * FROM tree ORDER BY level, name;
     `);
-    return result.rows;
+
+    const rows = result.rows;
+    const categoryMap = {};
+    const tree = [];
+
+    rows.forEach(row => {
+        categoryMap[row.id] = { ...row, children: [] };
+    });
+
+    rows.forEach(row => {
+        if (row.parent_id === null) {
+            tree.push(categoryMap[row.id]);
+        } else {
+            if (categoryMap[row.parent_id]) {
+                categoryMap[row.parent_id].children.push(categoryMap[row.id]);
+            }
+        }
+    });
+
+    return tree;
 }
 
 async function getCategoryBySlug(slug) {

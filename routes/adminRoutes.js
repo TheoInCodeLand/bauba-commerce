@@ -62,14 +62,16 @@ router.get('/products', async (req, res) => {
 
 // add product form
 router.get('/products/new', async (req, res) => {
-    const [categories, brands] = await Promise.all([
+    const [categories, categoryTree, brands] = await Promise.all([
         productService.getCategories(),
+        categoryService.getCategoryTree(),
         brandService.getAllBrands(),
     ]);
     res.render('admin/product-form', {
         title: 'Add Product',
         product: null,
         categories,
+        categoryTree,
         brands,
         errors: null,
     });
@@ -147,6 +149,8 @@ function buildProductPayload(body) {
         videoUrl: body.videoUrl || null,
         seoTitle: body.seoTitle || null,
         seoDescription: body.seoDescription || null,
+        specifications: body.specifications ? JSON.parse(body.specifications) : {},
+        variants: body.variants ? JSON.parse(body.variants) : [],
     };
 }
 
@@ -156,8 +160,9 @@ router.post('/products', [
     body('stockQuantity').isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
 ], async (req, res) => {
     const errors = validationResult(req);
-    const [categories, brands] = await Promise.all([
+    const [categories, categoryTree, brands] = await Promise.all([
         productService.getCategories(),
+        categoryService.getCategoryTree(),
         brandService.getAllBrands(),
     ]);
 
@@ -166,6 +171,7 @@ router.post('/products', [
             title: 'Add Product',
             product: req.body,
             categories,
+            categoryTree,
             brands,
             errors: errors.array(),
         });
@@ -179,6 +185,7 @@ router.post('/products', [
             title: 'Add Product',
             product: req.body,
             categories,
+            categoryTree,
             brands,
             errors: [{ msg: err.message }],
         });
@@ -188,9 +195,10 @@ router.post('/products', [
 // edit form
 router.get('/products/:id/edit', async (req, res) => {
     try {
-        const [product, categories, brands] = await Promise.all([
-            productService.getProductById(req.params.id),
+        const [product, categories, categoryTree, brands] = await Promise.all([
+            productService.getProductWithVariants(req.params.id),
             productService.getCategories(),
+            categoryService.getCategoryTree(),
             brandService.getAllBrands(),
         ]);
 
@@ -205,6 +213,7 @@ router.get('/products/:id/edit', async (req, res) => {
             title: 'Edit Product',
             product,
             categories,
+            categoryTree,
             brands,
             errors: null,
         });
@@ -223,8 +232,9 @@ router.post('/products/:id', [
     body('stockQuantity').isInt({ min: 0 }).withMessage('Stock must be 0 or more'),
 ], async (req, res) => {
     const errors = validationResult(req);
-    const [categories, brands] = await Promise.all([
+    const [categories, categoryTree, brands] = await Promise.all([
         productService.getCategories(),
+        categoryService.getCategoryTree(),
         brandService.getAllBrands(),
     ]);
 
@@ -233,6 +243,7 @@ router.post('/products/:id', [
             title: 'Edit Product',
             product: { ...req.body, id: req.params.id },
             categories,
+            categoryTree,
             brands,
             errors: errors.array(),
         });
@@ -246,6 +257,7 @@ router.post('/products/:id', [
             title: 'Edit Product',
             product: { ...req.body, id: req.params.id },
             categories,
+            categoryTree,
             brands,
             errors: [{ msg: err.message }],
         });
@@ -326,14 +338,16 @@ router.get('/categories', async (req, res) => {
 
 router.get('/categories/new', async (req, res) => {
     try {
-        const [categories, departments] = await Promise.all([
+        const [categories, categoryTree, departments] = await Promise.all([
             categoryService.getCategories(),
+            categoryService.getCategoryTree(),
             departmentService.getAllDepartments(),
         ]);
         res.render('admin/categories/form', {
             title: 'Add Category',
             category: null,
             categories,
+            categoryTree,
             departments,
             errors: null,
         });
@@ -351,8 +365,9 @@ router.post('/categories', [
     body('sortOrder').optional({ checkFalsy: true }).isInt({ min: 0 }).withMessage('Sort order must be a positive integer'),
 ], async (req, res) => {
     const errors = validationResult(req);
-    const [categories, departments] = await Promise.all([
+    const [categories, categoryTree, departments] = await Promise.all([
         categoryService.getCategories(),
+        categoryService.getCategoryTree(),
         departmentService.getAllDepartments(),
     ]);
 
@@ -361,6 +376,7 @@ router.post('/categories', [
             title: 'Add Category',
             category: req.body,
             categories,
+            categoryTree,
             departments,
             errors: errors.array(),
         });
@@ -374,6 +390,7 @@ router.post('/categories', [
             title: 'Add Category',
             category: req.body,
             categories,
+            categoryTree,
             departments,
             errors: [{ msg: err.message }],
         });
@@ -382,9 +399,10 @@ router.post('/categories', [
 
 router.get('/categories/:id/edit', async (req, res) => {
     try {
-        const [category, categories, departments] = await Promise.all([
+        const [category, categories, categoryTree, departments] = await Promise.all([
             categoryService.getCategoryById(req.params.id),
             categoryService.getCategories(),
+            categoryService.getCategoryTree(),
             departmentService.getAllDepartments(),
         ]);
 
@@ -399,6 +417,7 @@ router.get('/categories/:id/edit', async (req, res) => {
             title: 'Edit Category',
             category,
             categories,
+            categoryTree,
             departments,
             errors: null,
         });
@@ -416,8 +435,9 @@ router.post('/categories/:id', [
     body('sortOrder').optional({ checkFalsy: true }).isInt({ min: 0 }).withMessage('Sort order must be a positive integer'),
 ], async (req, res) => {
     const errors = validationResult(req);
-    const [categories, departments] = await Promise.all([
+    const [categories, categoryTree, departments] = await Promise.all([
         categoryService.getCategories(),
+        categoryService.getCategoryTree(),
         departmentService.getAllDepartments(),
     ]);
 
@@ -426,6 +446,7 @@ router.post('/categories/:id', [
             title: 'Edit Category',
             category: { ...req.body, id: req.params.id },
             categories,
+            categoryTree,
             departments,
             errors: errors.array(),
         });
@@ -439,6 +460,7 @@ router.post('/categories/:id', [
             title: 'Edit Category',
             category: { ...req.body, id: req.params.id },
             categories,
+            categoryTree,
             departments,
             errors: [{ msg: err.message }],
         });

@@ -316,172 +316,133 @@ async function getProductById(id) {
 
 async function createProduct(payload) {
     const {
-        name,
-        description,
-        price,
-        imageUrl,
-        categoryId,
-        stockQuantity,
-        shortDescription,
-        brandId,
-        sku,
-        barcode,
-        discountPrice,
-        costPrice,
-        currency = 'ZAR',
-        productType = 'physical',
-        weight,
-        dimensions,
-        shippingRequired = true,
-        isActive = true,
-        isFeatured = false,
-        isTrending = false,
-        isNewArrival = false,
-        publishedAt,
-        gallery,
-        videoUrl,
-        seoTitle,
-        seoDescription,
+        name, description, price, imageUrl, categoryId, stockQuantity, shortDescription,
+        brandId, sku, barcode, discountPrice, costPrice, currency = 'ZAR', productType = 'physical',
+        weight, dimensions, shippingRequired = true, isActive = true, isFeatured = false,
+        isTrending = false, isNewArrival = false, publishedAt, gallery, videoUrl, seoTitle, seoDescription,
+        specifications = {}, variants = []
     } = payload;
 
     const slug = slugify(name);
-    const result = await db.query(
-        `INSERT INTO products (
-            name, description, price, image_url, category_id, stock_quantity,
-            slug, short_description, brand_id, sku, barcode, discount_price,
-            cost_price, currency, product_type, weight, dimensions,
-            shipping_required, is_active, is_featured, is_trending, is_new_arrival,
-            published_at, gallery, video_url, seo_title, seo_description
-         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27)
-         RETURNING *`,
-        [
-            name,
-            description || null,
-            price,
-            imageUrl || null,
-            categoryId || null,
-            stockQuantity || 0,
-            slug,
-            shortDescription || null,
-            brandId || null,
-            sku || null,
-            barcode || null,
-            discountPrice || null,
-            costPrice || null,
-            currency,
-            productType,
-            weight || null,
-            dimensions || null,
-            shippingRequired,
-            isActive,
-            isFeatured,
-            isTrending,
-            isNewArrival,
-            publishedAt || null,
-            gallery || null,
-            videoUrl || null,
-            seoTitle || null,
-            seoDescription || null,
-        ]
-    );
-    return result.rows[0];
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const result = await client.query(
+            `INSERT INTO products (
+                name, description, price, image_url, category_id, stock_quantity,
+                slug, short_description, brand_id, sku, barcode, discount_price,
+                cost_price, currency, product_type, weight, dimensions,
+                shipping_required, is_active, is_featured, is_trending, is_new_arrival,
+                published_at, gallery, video_url, seo_title, seo_description, specifications
+             ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28)
+             RETURNING *`,
+            [
+                name, description || null, price, imageUrl || null, categoryId || null, stockQuantity || 0,
+                slug, shortDescription || null, brandId || null, sku || null, barcode || null, discountPrice || null,
+                costPrice || null, currency, productType, weight || null, dimensions || null,
+                shippingRequired, isActive, isFeatured, isTrending, isNewArrival,
+                publishedAt || null, gallery || null, videoUrl || null, seoTitle || null, seoDescription || null,
+                specifications
+            ]
+        );
+        const product = result.rows[0];
+
+        if (variants && Array.isArray(variants)) {
+            for (const v of variants) {
+                if (!v.sku) continue;
+                await client.query(
+                    `INSERT INTO product_variants (product_id, sku, color, size, price_override, stock_quantity)
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [product.id, v.sku, v.color || null, v.size || null, v.price_override || 0, v.stock_quantity || 0]
+                );
+            }
+        }
+        await client.query('COMMIT');
+        return product;
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    } finally {
+        client.release();
+    }
 }
 
 async function updateProduct(id, payload) {
     const {
-        name,
-        description,
-        price,
-        imageUrl,
-        categoryId,
-        stockQuantity,
-        shortDescription,
-        brandId,
-        sku,
-        barcode,
-        discountPrice,
-        costPrice,
-        currency,
-        productType,
-        weight,
-        dimensions,
-        shippingRequired,
-        isActive,
-        isFeatured,
-        isTrending,
-        isNewArrival,
-        publishedAt,
-        gallery,
-        videoUrl,
-        seoTitle,
-        seoDescription,
+        name, description, price, imageUrl, categoryId, stockQuantity, shortDescription,
+        brandId, sku, barcode, discountPrice, costPrice, currency, productType,
+        weight, dimensions, shippingRequired, isActive, isFeatured, isTrending, isNewArrival,
+        publishedAt, gallery, videoUrl, seoTitle, seoDescription, specifications, variants
     } = payload;
 
     const slug = name ? slugify(name) : null;
-    const result = await db.query(
-        `UPDATE products
-         SET name = COALESCE($1, name),
-             description = COALESCE($2, description),
-             price = COALESCE($3, price),
-             image_url = COALESCE($4, image_url),
-             category_id = COALESCE($5, category_id),
-             stock_quantity = COALESCE($6, stock_quantity),
-             slug = COALESCE($7, slug),
-             short_description = COALESCE($8, short_description),
-             brand_id = COALESCE($9, brand_id),
-             sku = COALESCE($10, sku),
-             barcode = COALESCE($11, barcode),
-             discount_price = COALESCE($12, discount_price),
-             cost_price = COALESCE($13, cost_price),
-             currency = COALESCE($14, currency),
-             product_type = COALESCE($15, product_type),
-             weight = COALESCE($16, weight),
-             dimensions = COALESCE($17, dimensions),
-             shipping_required = COALESCE($18, shipping_required),
-             is_active = COALESCE($19, is_active),
-             is_featured = COALESCE($20, is_featured),
-             is_trending = COALESCE($21, is_trending),
-             is_new_arrival = COALESCE($22, is_new_arrival),
-             published_at = COALESCE($23, published_at),
-             gallery = COALESCE($24, gallery),
-             video_url = COALESCE($25, video_url),
-             seo_title = COALESCE($26, seo_title),
-             seo_description = COALESCE($27, seo_description),
-             updated_at = CURRENT_TIMESTAMP
-         WHERE id = $28
-         RETURNING *`,
-        [
-            name || null,
-            description || null,
-            price || null,
-            imageUrl || null,
-            categoryId || null,
-            stockQuantity || null,
-            slug,
-            shortDescription || null,
-            brandId || null,
-            sku || null,
-            barcode || null,
-            discountPrice || null,
-            costPrice || null,
-            currency || null,
-            productType || null,
-            weight || null,
-            dimensions || null,
-            shippingRequired || null,
-            isActive || null,
-            isFeatured || null,
-            isTrending || null,
-            isNewArrival || null,
-            publishedAt || null,
-            gallery || null,
-            videoUrl || null,
-            seoTitle || null,
-            seoDescription || null,
-            id,
-        ]
-    );
-    return result.rows[0] || null;
+    const client = await db.pool.connect();
+    try {
+        await client.query('BEGIN');
+        const result = await client.query(
+            `UPDATE products
+             SET name = COALESCE($1, name),
+                 description = COALESCE($2, description),
+                 price = COALESCE($3, price),
+                 image_url = COALESCE($4, image_url),
+                 category_id = COALESCE($5, category_id),
+                 stock_quantity = COALESCE($6, stock_quantity),
+                 slug = COALESCE($7, slug),
+                 short_description = COALESCE($8, short_description),
+                 brand_id = COALESCE($9, brand_id),
+                 sku = COALESCE($10, sku),
+                 barcode = COALESCE($11, barcode),
+                 discount_price = COALESCE($12, discount_price),
+                 cost_price = COALESCE($13, cost_price),
+                 currency = COALESCE($14, currency),
+                 product_type = COALESCE($15, product_type),
+                 weight = COALESCE($16, weight),
+                 dimensions = COALESCE($17, dimensions),
+                 shipping_required = COALESCE($18, shipping_required),
+                 is_active = COALESCE($19, is_active),
+                 is_featured = COALESCE($20, is_featured),
+                 is_trending = COALESCE($21, is_trending),
+                 is_new_arrival = COALESCE($22, is_new_arrival),
+                 published_at = COALESCE($23, published_at),
+                 gallery = COALESCE($24, gallery),
+                 video_url = COALESCE($25, video_url),
+                 seo_title = COALESCE($26, seo_title),
+                 seo_description = COALESCE($27, seo_description),
+                 specifications = COALESCE($28, specifications),
+                 updated_at = CURRENT_TIMESTAMP
+             WHERE id = $29
+             RETURNING *`,
+            [
+                name || null, description || null, price || null, imageUrl || null, categoryId || null, stockQuantity || null,
+                slug, shortDescription || null, brandId || null, sku || null, barcode || null, discountPrice || null,
+                costPrice || null, currency || null, productType || null, weight || null, dimensions || null,
+                shippingRequired !== undefined ? shippingRequired : null, isActive !== undefined ? isActive : null, 
+                isFeatured !== undefined ? isFeatured : null, isTrending !== undefined ? isTrending : null, 
+                isNewArrival !== undefined ? isNewArrival : null, publishedAt || null, gallery || null, 
+                videoUrl || null, seoTitle || null, seoDescription || null, specifications || null, id
+            ]
+        );
+        const product = result.rows[0] || null;
+
+        if (product && variants && Array.isArray(variants)) {
+            await client.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
+            for (const v of variants) {
+                if (!v.sku) continue;
+                await client.query(
+                    `INSERT INTO product_variants (product_id, sku, color, size, price_override, stock_quantity)
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [id, v.sku, v.color || null, v.size || null, v.price_override || 0, v.stock_quantity || 0]
+                );
+            }
+        }
+        await client.query('COMMIT');
+        return product;
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    } finally {
+        client.release();
+    }
 }
 
 async function deleteProduct(id) {
@@ -644,10 +605,25 @@ async function getRecentlyViewedProducts(ids = []) {
     return ids.map(id => map[id]).filter(Boolean);
 }
 
+async function getProductWithVariants(productId) {
+    const productResult = await db.query('SELECT * FROM products WHERE id = $1 LIMIT 1', [productId]);
+    const productData = productResult.rows[0] || null;
+    
+    if (!productData) return null;
+
+    const variantsResult = await db.query('SELECT * FROM product_variants WHERE product_id = $1', [productId]);
+    
+    return {
+        ...productData,
+        variants: variantsResult.rows || []
+    };
+}
+
 module.exports = {
     getAllProducts,
     getProductById,
     getProductBySlug,
+    getProductWithVariants,
     createProduct,
     updateProduct,
     deleteProduct,
